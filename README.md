@@ -2,7 +2,7 @@
 
 [![](http://meritbadge.herokuapp.com/compact-genome)](https://crates.io/crates/compact-genome)
 [![](https://docs.rs/compact-genome/badge.svg)](https://docs.rs/compact-genome)
-![](https://github.com/sebschmi/compact-genome-rs/workflows/Tests%20and%20Lints/badge.svg?branch=master)
+![](https://github.com/sebschmi/compact-genome-rs/workflows/Tests%20and%20Lints/badge.svg?branch=main)
 
 A Rust crate to represent a genome string in memory.
 
