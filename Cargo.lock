@@ -115,9 +115,9 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "traitsequence"
-version = "0.6.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fc72819501e9c4430514249c67906b22235a0eb2ab30bf4ffebfdd69f32df3f"
+checksum = "21695cbcb01adde5f4b5e39be180ac583878a108314ed8877fe158d58ed770a1"
 
 [[package]]
 name = "unicode-xid"
