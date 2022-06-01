@@ -16,7 +16,7 @@ rust-version = "1.58.1"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-traitsequence = "1.0.0"
+traitsequence = "1.1.0"
 itertools = "0.10.3"
 bitvec = "0.22.3"
 ref-cast = "1.0.6"

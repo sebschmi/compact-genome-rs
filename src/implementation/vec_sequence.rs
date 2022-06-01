@@ -109,6 +109,11 @@ impl<'a, AlphabetType: Alphabet + 'a>
     EditableSequence<'a, AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
+    fn split_off(&'a mut self, at: usize) -> Self {
+        Self {
+            vector: self.vector.split_off(at),
+        }
+    }
 }
 
 impl<AlphabetType: Alphabet> Index<Range<usize>> for VectorGenome<AlphabetType> {

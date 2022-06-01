@@ -80,6 +80,12 @@ impl<'a, AlphabetType: Alphabet + 'a>
     EditableSequence<'a, AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
     for BitVectorGenome<AlphabetType>
 {
+    fn split_off(&'a mut self, at: usize) -> Self {
+        Self {
+            phantom_data: self.phantom_data,
+            bits: self.bits.split_off(at),
+        }
+    }
 }
 
 impl<AlphabetType: Alphabet> Index<Range<usize>> for BitVectorGenome<AlphabetType> {
