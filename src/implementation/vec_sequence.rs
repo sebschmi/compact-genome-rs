@@ -327,6 +327,19 @@ impl<'a, AlphabetType: Alphabet + 'a>
 {
 }
 
+impl<AlphabetType: Alphabet> VectorGenome<AlphabetType> {
+    /// Converts the `VectorGenome` to its inner data vector.
+    pub fn into_inner(self) -> Vec<AlphabetType::CharacterType> {
+        self.vector
+    }
+}
+
+impl<AlphabetType: Alphabet> From<VectorGenome<AlphabetType>> for Vec<AlphabetType::CharacterType> {
+    fn from(genome: VectorGenome<AlphabetType>) -> Self {
+        genome.into_inner()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::implementation::vec_sequence::VectorGenome;
