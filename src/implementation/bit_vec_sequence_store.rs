@@ -104,7 +104,12 @@ impl<AlphabetType: Alphabet + 'static> InverseMappingSequenceStore<AlphabetType>
     for BitVectorSequenceStore<AlphabetType>
 {
     fn map_sequence_ref_to_handle(&self, sequence_ref: &Self::SequenceRef) -> Self::Handle {
-        let raw_offset = self.sequence.bits.offset_from(&sequence_ref.bits[..]);
+        let raw_offset = unsafe {
+            sequence_ref
+                .bits
+                .as_bitptr()
+                .offset_from(self.sequence.bits.as_bitptr())
+        };
         debug_assert!(raw_offset >= 0);
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
         let offset = raw_offset as usize / bit_width;
