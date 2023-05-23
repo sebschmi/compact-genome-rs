@@ -3,6 +3,7 @@
 use crate::interface::alphabet::{Alphabet, AlphabetCharacter, AlphabetError};
 use lazy_static::lazy_static;
 use std::convert::TryFrom;
+use std::fmt::{Display, Formatter};
 
 /// A character of a DNA alphabet: A, C, G or T.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -98,6 +99,22 @@ impl Alphabet for DnaAlphabet {
     type CharacterType = DnaCharacter;
 }
 
+impl Display for DnaCharacter {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self.character {
+                0 => 'A',
+                1 => 'C',
+                2 => 'G',
+                3 => 'T',
+                _ => unreachable!("Character is private and cannot be constructed out of range."),
+            }
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::interface::alphabet::dna_alphabet::DnaCharacter;
@@ -117,6 +134,14 @@ mod tests {
             } else {
                 assert!(DnaCharacter::try_from(ascii).is_err());
             }
+        }
+    }
+
+    #[test]
+    fn test_display() {
+        for character in ['A', 'C', 'G', 'T'] {
+            let dna_character = DnaCharacter::try_from(u8::try_from(character).unwrap()).unwrap();
+            assert_eq!(format!("{character}"), format!("{dna_character}"));
         }
     }
 }
