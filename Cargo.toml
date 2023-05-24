@@ -11,7 +11,7 @@ documentation = "https://docs.rs/compact-genome"
 repository = "https://github.com/sebschmi/compact-genome-rs"
 readme = "README.md"
 license = "BSD-2-Clause"
-rust-version = "1.58.1"
+rust-version = "1.59.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
