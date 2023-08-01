@@ -1,6 +1,7 @@
 //! Alphabets for genome sequences.
 
 use std::convert::{TryFrom, TryInto};
+use thiserror::Error;
 
 pub mod dna_alphabet;
 pub mod dna_alphabet_or_n;
@@ -48,14 +49,16 @@ pub trait Alphabet: Sized {
 }
 
 /// An error when dealing with alphabets.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Error)]
 pub enum AlphabetError {
+    #[error("found an ASCII character that is not part of the alphabet: {ascii}")]
     /// An ascii character was attempted to convert to an alphabet character, but it is not part of the alphabet.
     AsciiNotPartOfAlphabet {
         /// The offending ascii character.
         ascii: u8,
     },
 
+    #[error("found an index that is not part of the alphabet: {index}")]
     /// An index was attempted to convert to an alphabet character, but it is not part of the alphabet.
     IndexNotPartOfAlphabet {
         /// The offending index.
