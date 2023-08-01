@@ -8,17 +8,14 @@ use std::marker::PhantomData;
 /// In other words, all sequences with hamming distance one of the same length.
 /// While the returned type works like an iterator, it does not implement the iterator trait due to limitations of the type system.
 pub fn substitution_distance_one_neighbor_iterator<
-    'owned_sequence,
     AlphabetType: Alphabet,
-    Sequence: OwnedGenomeSequence<'owned_sequence, AlphabetType, Subsequence>
-        + for<'sequence> GenomeSequenceMut<'sequence, AlphabetType, Subsequence>
+    Sequence: OwnedGenomeSequence<AlphabetType, Subsequence>
+        + GenomeSequenceMut<AlphabetType, Subsequence>
         + Sized,
-    Subsequence: 'owned_sequence
-        + for<'subsequence> GenomeSequenceMut<'subsequence, AlphabetType, Subsequence>
-        + ?Sized,
+    Subsequence: GenomeSequenceMut<AlphabetType, Subsequence> + ?Sized,
 >(
     sequence: Sequence,
-) -> SubstitutionDistanceOneNeighborIterator<'owned_sequence, AlphabetType, Sequence, Subsequence> {
+) -> SubstitutionDistanceOneNeighborIterator<AlphabetType, Sequence, Subsequence> {
     SubstitutionDistanceOneNeighborIterator::new(sequence)
 }
 
@@ -26,34 +23,27 @@ pub fn substitution_distance_one_neighbor_iterator<
 /// In other words, all sequences with hamming distance one of the same length.
 /// While the type works like an iterator, it does not implement the iterator trait due to limitations of the type system.
 pub struct SubstitutionDistanceOneNeighborIterator<
-    'owned_sequence,
     AlphabetType: Alphabet,
-    Sequence: OwnedGenomeSequence<'owned_sequence, AlphabetType, Subsequence>
-        + for<'sequence> GenomeSequenceMut<'sequence, AlphabetType, Subsequence>
+    Sequence: OwnedGenomeSequence<AlphabetType, Subsequence>
+        + GenomeSequenceMut<AlphabetType, Subsequence>
         + Sized,
-    Subsequence: 'owned_sequence
-        + for<'subsequence> GenomeSequenceMut<'subsequence, AlphabetType, Subsequence>
-        + ?Sized,
+    Subsequence: GenomeSequenceMut<AlphabetType, Subsequence> + ?Sized,
 > {
     current_index: usize,
     current_character: usize,
     original_character: AlphabetType::CharacterType,
     sequence: Sequence,
-    subsequence: PhantomData<&'owned_sequence Subsequence>,
+    subsequence: PhantomData<Subsequence>,
     alphabet_type: PhantomData<AlphabetType>,
 }
 
 impl<
-        'owned_sequence,
         AlphabetType: Alphabet,
-        Sequence: OwnedGenomeSequence<'owned_sequence, AlphabetType, Subsequence>
-            + for<'sequence> GenomeSequenceMut<'sequence, AlphabetType, Subsequence>
+        Sequence: OwnedGenomeSequence<AlphabetType, Subsequence>
+            + GenomeSequenceMut<AlphabetType, Subsequence>
             + Sized,
-        Subsequence: 'owned_sequence
-            + for<'subsequence> GenomeSequenceMut<'subsequence, AlphabetType, Subsequence>
-            + ?Sized,
-    >
-    SubstitutionDistanceOneNeighborIterator<'owned_sequence, AlphabetType, Sequence, Subsequence>
+        Subsequence: GenomeSequenceMut<AlphabetType, Subsequence> + ?Sized,
+    > SubstitutionDistanceOneNeighborIterator<AlphabetType, Sequence, Subsequence>
 {
     fn new(sequence: Sequence) -> Self {
         Self {

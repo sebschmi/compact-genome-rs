@@ -17,18 +17,17 @@ pub type ReverseComplementIterator<I, AlphabetType> = Map<
 
 /// A genome sequence.
 pub trait GenomeSequence<
-    'a,
     AlphabetType: Alphabet,
-    GenomeSubsequence: GenomeSequence<'a, AlphabetType, GenomeSubsequence> + ?Sized,
->: Sequence<'a, AlphabetType::CharacterType, GenomeSubsequence>
+    GenomeSubsequence: GenomeSequence<AlphabetType, GenomeSubsequence> + ?Sized,
+>: Sequence<AlphabetType::CharacterType, GenomeSubsequence>
 {
     /// Returns true if this genome is valid, i.e. it contains no invalid characters.
-    fn is_valid(&'a self) -> bool {
+    fn is_valid(&self) -> bool {
         true
     }
 
     /// Copies this genome string into a `Vec`.
-    fn clone_as_vec(&'a self) -> Vec<u8> {
+    fn clone_as_vec(&self) -> Vec<u8> {
         self.iter()
             .cloned()
             .map(AlphabetType::character_to_ascii)
@@ -41,7 +40,7 @@ pub trait GenomeSequence<
     }
 
     /// Returns the genome as nucleotide string.
-    fn as_string(&'a self) -> String {
+    fn as_string(&self) -> String {
         String::from_utf8(self.clone_as_vec())
             .expect("Genome contains non-utf8 characters (It should be ASCII only).")
     }
@@ -49,8 +48,8 @@ pub trait GenomeSequence<
     /// Returns an iterator over the reverse complement of this genome.
     /// Panics if the iterator his an invalid character (see [not valid](GenomeSequence::is_valid)).
     fn reverse_complement_iter(
-        &'a self,
-    ) -> ReverseComplementIterator<Self::Iterator, AlphabetType> {
+        &self,
+    ) -> ReverseComplementIterator<Self::Iterator<'_>, AlphabetType> {
         self.iter()
             .rev()
             .map(AlphabetType::CharacterType::complement)
@@ -59,27 +58,27 @@ pub trait GenomeSequence<
     /// Returns an owned copy of the reverse complement of this genome.
     /// Panics if this genome is [not valid](GenomeSequence::is_valid).
     fn convert_with_reverse_complement<
-        ReverseComplementSequence: for<'rc> OwnedGenomeSequence<'rc, AlphabetType, ReverseComplementSubsequence>,
-        ReverseComplementSubsequence: for<'rc> GenomeSequence<'a, AlphabetType, ReverseComplementSubsequence> + ?Sized,
+        ReverseComplementSequence: OwnedGenomeSequence<AlphabetType, ReverseComplementSubsequence>,
+        ReverseComplementSubsequence: GenomeSequence<AlphabetType, ReverseComplementSubsequence> + ?Sized,
     >(
-        &'a self,
+        &self,
     ) -> ReverseComplementSequence {
         self.reverse_complement_iter().collect()
     }
 
     /// Returns an owned copy of this genome.
     fn convert<
-        ResultSequence: for<'rc> OwnedGenomeSequence<'rc, AlphabetType, ResultSubsequence>,
-        ResultSubsequence: for<'rc> GenomeSequence<'rc, AlphabetType, ResultSubsequence> + ?Sized,
+        ResultSequence: OwnedGenomeSequence<AlphabetType, ResultSubsequence>,
+        ResultSubsequence: GenomeSequence<AlphabetType, ResultSubsequence> + ?Sized,
     >(
-        &'a self,
+        &self,
     ) -> ResultSequence {
         self.iter().cloned().collect()
     }
 
     /// Returns true if the genome is canonical.
     /// A canonical genome is lexicographically smaller or equal to its reverse complement.
-    fn is_canonical(&'a self) -> bool {
+    fn is_canonical(&self) -> bool {
         for (forward_character, reverse_character) in
             self.iter().cloned().zip(self.reverse_complement_iter())
         {
@@ -94,24 +93,23 @@ pub trait GenomeSequence<
 
     /// Returns true if the genome is self-complemental.
     /// A self-complemental genome is equivalent to its reverse complement.
-    fn is_self_complemental(&'a self) -> bool {
+    fn is_self_complemental(&self) -> bool {
         self.iter().cloned().eq(self.reverse_complement_iter())
     }
 }
 
 /// A genome sequence that is owned, i.e. not a reference.
 pub trait OwnedGenomeSequence<
-    'a,
     AlphabetType: Alphabet,
-    GenomeSubsequence: GenomeSequence<'a, AlphabetType, GenomeSubsequence> + ?Sized,
+    GenomeSubsequence: GenomeSequence<AlphabetType, GenomeSubsequence> + ?Sized,
 >:
-    for<'s> GenomeSequence<'s, AlphabetType, GenomeSubsequence>
+    GenomeSequence<AlphabetType, GenomeSubsequence>
     + FromIterator<AlphabetType::CharacterType>
-    + for<'s> OwnedSequence<'s, AlphabetType::CharacterType, GenomeSubsequence>
+    + OwnedSequence<AlphabetType::CharacterType, GenomeSubsequence>
 {
     /// Returns the reverse complement of this genome.
     /// Panics if this genome is [not valid](GenomeSequence::is_valid).
-    fn clone_as_reverse_complement(&'a self) -> Self {
+    fn clone_as_reverse_complement(&self) -> Self {
         self.reverse_complement_iter().collect()
     }
 
@@ -132,12 +130,11 @@ pub trait OwnedGenomeSequence<
 
 /// A mutable genome sequence.
 pub trait GenomeSequenceMut<
-    'a,
     AlphabetType: Alphabet,
-    GenomeSubsequenceMut: GenomeSequenceMut<'a, AlphabetType, GenomeSubsequenceMut> + ?Sized,
+    GenomeSubsequenceMut: GenomeSequenceMut<AlphabetType, GenomeSubsequenceMut> + ?Sized,
 >:
-    SequenceMut<'a, AlphabetType::CharacterType, GenomeSubsequenceMut>
-    + GenomeSequence<'a, AlphabetType, GenomeSubsequenceMut>
+    SequenceMut<AlphabetType::CharacterType, GenomeSubsequenceMut>
+    + GenomeSequence<AlphabetType, GenomeSubsequenceMut>
 {
 }
 
@@ -148,12 +145,11 @@ type IntoIterU8<SourceType, AlphabetType> = Map<
 
 /// An editable genome sequence.
 pub trait EditableGenomeSequence<
-    'a,
     AlphabetType: Alphabet,
-    GenomeSubsequence: GenomeSequence<'a, AlphabetType, GenomeSubsequence> + ?Sized,
+    GenomeSubsequence: GenomeSequence<AlphabetType, GenomeSubsequence> + ?Sized,
 >:
-    EditableSequence<'a, AlphabetType::CharacterType, GenomeSubsequence>
-    + GenomeSequence<'a, AlphabetType, GenomeSubsequence>
+    EditableSequence<AlphabetType::CharacterType, GenomeSubsequence>
+    + GenomeSequence<AlphabetType, GenomeSubsequence>
 {
     /// Converts this genome sequence into an iterator over ASCII characters.
     fn into_iter_u8(self) -> IntoIterU8<Self, AlphabetType> {

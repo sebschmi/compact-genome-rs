@@ -10,13 +10,13 @@ pub trait SequenceStore<AlphabetType: Alphabet> {
 
     /// A reference to a sequence stored in this store.
     /// This trait only uses `&SequenceRef`, so `SequenceRef` should be the base type and not a reference type itself.
-    type SequenceRef: for<'a> GenomeSequence<'a, AlphabetType, Self::SequenceRef> + ?Sized;
+    type SequenceRef: GenomeSequence<AlphabetType, Self::SequenceRef> + ?Sized;
 
     /// Adds a sequence to this store and returns a handle for later retrieval.
     /// Handles do not borrow the sequence store, so they can exist while the store is modified.
     fn add<
-        Sequence: for<'a> GenomeSequence<'a, AlphabetType, Subsequence> + ?Sized,
-        Subsequence: for<'a> GenomeSequence<'a, AlphabetType, Subsequence> + ?Sized,
+        Sequence: GenomeSequence<AlphabetType, Subsequence> + ?Sized,
+        Subsequence: GenomeSequence<AlphabetType, Subsequence> + ?Sized,
     >(
         &mut self,
         s: &Sequence,

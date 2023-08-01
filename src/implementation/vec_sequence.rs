@@ -26,28 +26,25 @@ pub struct VectorSubGenome<AlphabetType: Alphabet> {
     pub(crate) slice: [AlphabetType::CharacterType],
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    GenomeSequence<'a, AlphabetType, VectorSubGenome<AlphabetType>> for VectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, VectorSubGenome<AlphabetType>>
+    for VectorGenome<AlphabetType>
 {
     fn as_genome_subsequence(&self) -> &VectorSubGenome<AlphabetType> {
         VectorSubGenome::ref_cast(&self.vector[..])
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    GenomeSequenceMut<'a, AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> GenomeSequenceMut<AlphabetType, VectorSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
 }
 
-impl<'a, AlphabetType: Alphabet + 'static>
-    OwnedGenomeSequence<'a, AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> OwnedGenomeSequence<AlphabetType, VectorSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    EditableGenomeSequence<'a, AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, VectorSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
     fn reserve(&mut self, additional: usize) {
@@ -63,25 +60,22 @@ impl<'a, AlphabetType: Alphabet + 'a>
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    GenomeSequence<'a, AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, VectorSubGenome<AlphabetType>>
     for VectorSubGenome<AlphabetType>
 {
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    GenomeSequenceMut<'a, AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> GenomeSequenceMut<AlphabetType, VectorSubGenome<AlphabetType>>
     for VectorSubGenome<AlphabetType>
 {
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    Sequence<'a, AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
-    type Iterator = std::slice::Iter<'a, AlphabetType::CharacterType>;
+    type Iterator <'a>= std::slice::Iter<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
 
-    fn iter(&'a self) -> Self::Iterator {
+    fn iter(&self) -> Self::Iterator<'_> {
         self.as_genome_subsequence().iter()
     }
 
@@ -90,13 +84,12 @@ impl<'a, AlphabetType: Alphabet + 'a>
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    Sequence<'a, AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
     for VectorSubGenome<AlphabetType>
 {
-    type Iterator = std::slice::Iter<'a, AlphabetType::CharacterType>;
+    type Iterator<'a> = std::slice::Iter<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
 
-    fn iter(&'a self) -> Self::Iterator {
+    fn iter(&self) -> Self::Iterator<'_> {
         self.slice.iter()
     }
 
@@ -105,11 +98,11 @@ impl<'a, AlphabetType: Alphabet + 'a>
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    EditableSequence<'a, AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet>
+    EditableSequence<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
-    fn split_off(&'a mut self, at: usize) -> Self {
+    fn split_off(&mut self, at: usize) -> Self {
         Self {
             vector: self.vector.split_off(at),
         }
@@ -267,47 +260,45 @@ impl<AlphabetType: Alphabet> ToOwned for VectorSubGenome<AlphabetType> {
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    SequenceMut<'a, AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
-    type IteratorMut = std::slice::IterMut<'a, AlphabetType::CharacterType>;
+    type IteratorMut<'a> = std::slice::IterMut<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
 
-    fn iter_mut(&'a mut self) -> Self::IteratorMut {
+    fn iter_mut(&mut self) -> Self::IteratorMut<'_> {
         self.vector.iter_mut()
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a> IndexMut<usize> for VectorGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> IndexMut<usize> for VectorGenome<AlphabetType> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.vector.index_mut(index)
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a> IndexMut<Range<usize>> for VectorGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> IndexMut<Range<usize>> for VectorGenome<AlphabetType> {
     fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
         VectorSubGenome::ref_cast_mut(&mut self.vector[index])
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    SequenceMut<'a, AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
     for VectorSubGenome<AlphabetType>
 {
-    type IteratorMut = std::slice::IterMut<'a, AlphabetType::CharacterType>;
+    type IteratorMut<'a> = std::slice::IterMut<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
 
-    fn iter_mut(&'a mut self) -> Self::IteratorMut {
+    fn iter_mut(&mut self) -> Self::IteratorMut<'_> {
         self.slice.iter_mut()
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a> IndexMut<usize> for VectorSubGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> IndexMut<usize> for VectorSubGenome<AlphabetType> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.slice.index_mut(index)
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a> IndexMut<Range<usize>> for VectorSubGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> IndexMut<Range<usize>> for VectorSubGenome<AlphabetType> {
     fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
         VectorSubGenome::ref_cast_mut(&mut self.slice[index])
     }
@@ -321,8 +312,8 @@ impl<AlphabetType: Alphabet> Default for VectorGenome<AlphabetType> {
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    OwnedSequence<'a, AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet>
+    OwnedSequence<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
 }

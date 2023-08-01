@@ -46,13 +46,12 @@ impl<AlphabetType: Alphabet> BitVectorGenome<AlphabetType> {
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    Sequence<'a, AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
     for BitVectorGenome<AlphabetType>
 {
-    type Iterator = BitVectorSubGenomeIterator<'a, AlphabetType>;
+    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType> where AlphabetType: 'a;
 
-    fn iter(&'a self) -> Self::Iterator {
+    fn iter(&self) -> Self::Iterator<'_> {
         self.as_genome_subsequence().iter()
     }
 
@@ -61,13 +60,12 @@ impl<'a, AlphabetType: Alphabet + 'a>
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    Sequence<'a, AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
     for BitVectorSubGenome<AlphabetType>
 {
-    type Iterator = BitVectorSubGenomeIterator<'a, AlphabetType>;
+    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType> where AlphabetType: 'a;
 
-    fn iter(&'a self) -> Self::Iterator {
+    fn iter(&self) -> Self::Iterator<'_> {
         BitVectorSubGenomeIterator { slice: self }
     }
 
@@ -76,11 +74,11 @@ impl<'a, AlphabetType: Alphabet + 'a>
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    EditableSequence<'a, AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet>
+    EditableSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
     for BitVectorGenome<AlphabetType>
 {
-    fn split_off(&'a mut self, at: usize) -> Self {
+    fn split_off(&mut self, at: usize) -> Self {
         Self {
             phantom_data: self.phantom_data,
             bits: self.bits.split_off(at),
@@ -303,8 +301,7 @@ impl<AlphabetType: Alphabet> ToOwned for BitVectorSubGenome<AlphabetType> {
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    GenomeSequence<'a, AlphabetType, BitVectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>>
     for BitVectorGenome<AlphabetType>
 {
     fn as_genome_subsequence(&self) -> &BitVectorSubGenome<AlphabetType> {
@@ -312,14 +309,12 @@ impl<'a, AlphabetType: Alphabet + 'a>
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'static>
-    OwnedGenomeSequence<'a, AlphabetType, BitVectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> OwnedGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>>
     for BitVectorGenome<AlphabetType>
 {
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    EditableGenomeSequence<'a, AlphabetType, BitVectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>>
     for BitVectorGenome<AlphabetType>
 {
     fn reserve(&mut self, additional: usize) {
@@ -349,14 +344,13 @@ impl<'a, AlphabetType: Alphabet + 'a>
     }
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    GenomeSequence<'a, AlphabetType, BitVectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>>
     for BitVectorSubGenome<AlphabetType>
 {
 }
 
-impl<'a, AlphabetType: Alphabet + 'a>
-    OwnedSequence<'a, AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet>
+    OwnedSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
     for BitVectorGenome<AlphabetType>
 {
 }

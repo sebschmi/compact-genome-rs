@@ -48,8 +48,8 @@ impl<AlphabetType: Alphabet + 'static> SequenceStore<AlphabetType>
     type SequenceRef = BitVectorSubGenome<AlphabetType>;
 
     fn add<
-        Sequence: for<'a> GenomeSequence<'a, AlphabetType, Subsequence> + ?Sized,
-        Subsequence: for<'a> GenomeSequence<'a, AlphabetType, Subsequence> + ?Sized,
+        Sequence: GenomeSequence<AlphabetType, Subsequence> + ?Sized,
+        Subsequence: GenomeSequence<AlphabetType, Subsequence> + ?Sized,
     >(
         &mut self,
         s: &Sequence,
