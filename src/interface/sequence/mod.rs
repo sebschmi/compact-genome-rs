@@ -1,8 +1,11 @@
 //! Traits for genome sequences.
 
 use crate::interface::alphabet::{Alphabet, AlphabetCharacter, AlphabetError};
+use crate::interface::k_mer::OwnedKmer;
 use std::cmp::Ordering;
-use std::iter::{FromIterator, Map, Rev};
+use std::iter;
+use std::iter::{FromIterator, Map, Repeat, Rev, Zip};
+use std::ops::Range;
 use traitsequence::interface::{EditableSequence, OwnedSequence, Sequence, SequenceMut};
 
 pub mod neighbor_iterators;
@@ -13,6 +16,12 @@ pub type ReverseComplementIterator<I, AlphabetType> = Map<
     for<'c> fn(
         &'c <AlphabetType as Alphabet>::CharacterType,
     ) -> <AlphabetType as Alphabet>::CharacterType,
+>;
+
+/// An iterator over the cloned k-mers of a genome sequence.
+pub type OwnedKmerIterator<'a, GenomeSequenceType, KmerType> = Map<
+    Zip<Range<usize>, Repeat<&'a GenomeSequenceType>>,
+    fn((usize, &'a GenomeSequenceType)) -> KmerType,
 >;
 
 /// A genome sequence.
@@ -53,6 +62,21 @@ pub trait GenomeSequence<
         self.iter()
             .rev()
             .map(AlphabetType::CharacterType::complement)
+    }
+
+    /// Returns an iterator over the k-mers of this genome.
+    /// The k-mers are cloned from this genome.
+    fn cloned_k_mer_iter<
+        const K: usize,
+        KmerType: OwnedKmer<K, AlphabetType, GenomeSubsequence>,
+    >(
+        &self,
+    ) -> OwnedKmerIterator<'_, Self, KmerType> {
+        (0..self.len() - K + 1)
+            .zip(iter::repeat(self))
+            .map(|(offset, source_genome)| {
+                source_genome.iter().skip(offset).take(K).cloned().collect()
+            })
     }
 
     /// Returns an owned copy of the reverse complement of this genome.
