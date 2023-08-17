@@ -1,6 +1,6 @@
 //! An ASCII vector based sequence store.
 
-use crate::implementation::vec_sequence::VectorSubGenome;
+use crate::implementation::vec_sequence::SliceSubGenome;
 use crate::interface::alphabet::{Alphabet, AlphabetCharacter, AlphabetError};
 use crate::interface::sequence::GenomeSequence;
 use crate::interface::sequence_store::{
@@ -37,7 +37,7 @@ impl<AlphabetType: Alphabet + 'static> SequenceStore<AlphabetType>
     for VectorSequenceStore<AlphabetType>
 {
     type Handle = VectorSequenceStoreHandle<AlphabetType>;
-    type SequenceRef = VectorSubGenome<AlphabetType>;
+    type SequenceRef = SliceSubGenome<AlphabetType>;
 
     fn add<
         Sequence: GenomeSequence<AlphabetType, Subsequence> + ?Sized,
@@ -84,7 +84,7 @@ impl<AlphabetType: Alphabet + 'static> SequenceStore<AlphabetType>
     }
 
     fn get(&self, handle: &Self::Handle) -> &Self::SequenceRef {
-        VectorSubGenome::ref_cast(&self.sequence[handle.offset..handle.offset + handle.len])
+        SliceSubGenome::ref_cast(&self.sequence[handle.offset..handle.offset + handle.len])
     }
 }
 

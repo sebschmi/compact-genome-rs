@@ -1,7 +1,8 @@
-pub mod vec_sequence;
-
+pub mod array_kmer;
+pub mod bit_array_kmer;
 pub mod bit_vec_sequence;
 pub mod bit_vec_sequence_store;
+pub mod vec_sequence;
 pub mod vec_sequence_store;
 
 /// The default genome type that achieves a good balance between speed and size.

@@ -18,33 +18,33 @@ pub struct VectorGenome<AlphabetType: Alphabet> {
     vector: Vec<AlphabetType::CharacterType>,
 }
 
-/// The subsequence of a genome sequence stored as vector of plain characters.
+/// The subsequence of a genome sequence stored as slice of plain characters.
 #[derive(RefCast, Debug, Eq, PartialEq, Hash)]
 #[repr(transparent)]
-pub struct VectorSubGenome<AlphabetType: Alphabet> {
+pub struct SliceSubGenome<AlphabetType: Alphabet> {
     //phantom_data: PhantomData<AlphabetType>,
     pub(crate) slice: [AlphabetType::CharacterType],
 }
 
-impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
-    fn as_genome_subsequence(&self) -> &VectorSubGenome<AlphabetType> {
-        VectorSubGenome::ref_cast(&self.vector[..])
+    fn as_genome_subsequence(&self) -> &SliceSubGenome<AlphabetType> {
+        SliceSubGenome::ref_cast(&self.vector[..])
     }
 }
 
-impl<AlphabetType: Alphabet> GenomeSequenceMut<AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> GenomeSequenceMut<AlphabetType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
 }
 
-impl<AlphabetType: Alphabet> OwnedGenomeSequence<AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> OwnedGenomeSequence<AlphabetType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
 }
 
-impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
     fn reserve(&mut self, additional: usize) {
@@ -60,17 +60,17 @@ impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, VectorSubGenom
     }
 }
 
-impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, VectorSubGenome<AlphabetType>>
-    for VectorSubGenome<AlphabetType>
+impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, SliceSubGenome<AlphabetType>>
+    for SliceSubGenome<AlphabetType>
 {
 }
 
-impl<AlphabetType: Alphabet> GenomeSequenceMut<AlphabetType, VectorSubGenome<AlphabetType>>
-    for VectorSubGenome<AlphabetType>
+impl<AlphabetType: Alphabet> GenomeSequenceMut<AlphabetType, SliceSubGenome<AlphabetType>>
+    for SliceSubGenome<AlphabetType>
 {
 }
 
-impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
     type Iterator <'a>= std::slice::Iter<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
@@ -84,8 +84,8 @@ impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, VectorSubGeno
     }
 }
 
-impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
-    for VectorSubGenome<AlphabetType>
+impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
+    for SliceSubGenome<AlphabetType>
 {
     type Iterator<'a> = std::slice::Iter<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
 
@@ -99,7 +99,7 @@ impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, VectorSubGeno
 }
 
 impl<AlphabetType: Alphabet>
-    EditableSequence<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+    EditableSequence<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
     fn split_off(&mut self, at: usize) -> Self {
@@ -110,7 +110,7 @@ impl<AlphabetType: Alphabet>
 }
 
 impl<AlphabetType: Alphabet> Index<Range<usize>> for VectorGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
@@ -118,7 +118,7 @@ impl<AlphabetType: Alphabet> Index<Range<usize>> for VectorGenome<AlphabetType> 
 }
 
 impl<AlphabetType: Alphabet> Index<RangeFrom<usize>> for VectorGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
@@ -126,7 +126,7 @@ impl<AlphabetType: Alphabet> Index<RangeFrom<usize>> for VectorGenome<AlphabetTy
 }
 
 impl<AlphabetType: Alphabet> Index<RangeTo<usize>> for VectorGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeTo<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
@@ -134,7 +134,7 @@ impl<AlphabetType: Alphabet> Index<RangeTo<usize>> for VectorGenome<AlphabetType
 }
 
 impl<AlphabetType: Alphabet> Index<RangeFull> for VectorGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeFull) -> &Self::Output {
         self.as_genome_subsequence().index(index)
@@ -142,7 +142,7 @@ impl<AlphabetType: Alphabet> Index<RangeFull> for VectorGenome<AlphabetType> {
 }
 
 impl<AlphabetType: Alphabet> Index<RangeInclusive<usize>> for VectorGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeInclusive<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
@@ -150,7 +150,7 @@ impl<AlphabetType: Alphabet> Index<RangeInclusive<usize>> for VectorGenome<Alpha
 }
 
 impl<AlphabetType: Alphabet> Index<RangeToInclusive<usize>> for VectorGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeToInclusive<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
@@ -165,55 +165,55 @@ impl<AlphabetType: Alphabet> Index<usize> for VectorGenome<AlphabetType> {
     }
 }
 
-impl<AlphabetType: Alphabet> Index<Range<usize>> for VectorSubGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet> Index<Range<usize>> for SliceSubGenome<AlphabetType> {
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
-        VectorSubGenome::ref_cast(&self.slice[index.start..index.end])
+        SliceSubGenome::ref_cast(&self.slice[index.start..index.end])
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeFrom<usize>> for VectorSubGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet> Index<RangeFrom<usize>> for SliceSubGenome<AlphabetType> {
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
         self.index(index.start..self.len())
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeTo<usize>> for VectorSubGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet> Index<RangeTo<usize>> for SliceSubGenome<AlphabetType> {
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeTo<usize>) -> &Self::Output {
         self.index(0..index.end)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeFull> for VectorSubGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet> Index<RangeFull> for SliceSubGenome<AlphabetType> {
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, _index: RangeFull) -> &Self::Output {
         self.index(0..self.len())
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeInclusive<usize>> for VectorSubGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet> Index<RangeInclusive<usize>> for SliceSubGenome<AlphabetType> {
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeInclusive<usize>) -> &Self::Output {
-        VectorSubGenome::ref_cast(&self.slice[*index.start()..=*index.end()])
+        SliceSubGenome::ref_cast(&self.slice[*index.start()..=*index.end()])
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeToInclusive<usize>> for VectorSubGenome<AlphabetType> {
-    type Output = VectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet> Index<RangeToInclusive<usize>> for SliceSubGenome<AlphabetType> {
+    type Output = SliceSubGenome<AlphabetType>;
 
     fn index(&self, index: RangeToInclusive<usize>) -> &Self::Output {
         self.index(0..=index.end)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<usize> for VectorSubGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> Index<usize> for SliceSubGenome<AlphabetType> {
     type Output = AlphabetType::CharacterType;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -246,13 +246,13 @@ impl<AlphabetType: Alphabet> IntoIterator for VectorGenome<AlphabetType> {
     }
 }
 
-impl<AlphabetType: Alphabet> Borrow<VectorSubGenome<AlphabetType>> for VectorGenome<AlphabetType> {
-    fn borrow(&self) -> &VectorSubGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> Borrow<SliceSubGenome<AlphabetType>> for VectorGenome<AlphabetType> {
+    fn borrow(&self) -> &SliceSubGenome<AlphabetType> {
         self.as_genome_subsequence()
     }
 }
 
-impl<AlphabetType: Alphabet> ToOwned for VectorSubGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> ToOwned for SliceSubGenome<AlphabetType> {
     type Owned = VectorGenome<AlphabetType>;
 
     fn to_owned(&self) -> Self::Owned {
@@ -260,7 +260,7 @@ impl<AlphabetType: Alphabet> ToOwned for VectorSubGenome<AlphabetType> {
     }
 }
 
-impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
     type IteratorMut<'a> = std::slice::IterMut<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
@@ -278,12 +278,12 @@ impl<AlphabetType: Alphabet> IndexMut<usize> for VectorGenome<AlphabetType> {
 
 impl<AlphabetType: Alphabet> IndexMut<Range<usize>> for VectorGenome<AlphabetType> {
     fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
-        VectorSubGenome::ref_cast_mut(&mut self.vector[index])
+        SliceSubGenome::ref_cast_mut(&mut self.vector[index])
     }
 }
 
-impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
-    for VectorSubGenome<AlphabetType>
+impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
+    for SliceSubGenome<AlphabetType>
 {
     type IteratorMut<'a> = std::slice::IterMut<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
 
@@ -292,15 +292,15 @@ impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, VectorSubG
     }
 }
 
-impl<AlphabetType: Alphabet> IndexMut<usize> for VectorSubGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> IndexMut<usize> for SliceSubGenome<AlphabetType> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.slice.index_mut(index)
     }
 }
 
-impl<AlphabetType: Alphabet> IndexMut<Range<usize>> for VectorSubGenome<AlphabetType> {
+impl<AlphabetType: Alphabet> IndexMut<Range<usize>> for SliceSubGenome<AlphabetType> {
     fn index_mut(&mut self, index: Range<usize>) -> &mut Self::Output {
-        VectorSubGenome::ref_cast_mut(&mut self.slice[index])
+        SliceSubGenome::ref_cast_mut(&mut self.slice[index])
     }
 }
 
@@ -313,7 +313,7 @@ impl<AlphabetType: Alphabet> Default for VectorGenome<AlphabetType> {
 }
 
 impl<AlphabetType: Alphabet>
-    OwnedSequence<AlphabetType::CharacterType, VectorSubGenome<AlphabetType>>
+    OwnedSequence<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
 }

@@ -160,6 +160,10 @@ pub trait GenomeSequenceMut<
     SequenceMut<AlphabetType::CharacterType, GenomeSubsequenceMut>
     + GenomeSequence<AlphabetType, GenomeSubsequenceMut>
 {
+    /// Get a reference to this genome as its subsequence type.
+    fn as_genome_subsequence_mut(&mut self) -> &mut GenomeSubsequenceMut {
+        self.index_mut(0..self.len())
+    }
 }
 
 type IntoIterU8<SourceType, AlphabetType> = Map<
