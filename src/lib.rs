@@ -4,3 +4,5 @@
 /// Different implementations of genome string representations.
 pub mod implementation;
 pub mod interface;
+#[cfg(feature = "io")]
+pub mod io;
