@@ -1,9 +1,9 @@
 //! Various methods of inputting and outputting sequences.
 
-use std::io::{BufReader, Read, Seek};
+use std::io::{BufReader, Read, Seek, Write};
 
 use error::IOError;
-use flate2::bufread::GzDecoder;
+use flate2::{bufread::GzDecoder, write::GzEncoder, Compression};
 use itertools::Itertools;
 
 pub mod error;
@@ -57,6 +57,18 @@ fn unzip_if_zipped<T>(
     }
 
     unreachable!("formats vec always contains the None format")
+}
+
+/// Wrapper around an output function applying the requested compression.
+fn zip<T>(
+    mut writer: impl Write,
+    zip_format: ZipFormat,
+    write_function: impl FnOnce(&mut dyn Write) -> Result<T, IOError>,
+) -> Result<T, IOError> {
+    match zip_format {
+        ZipFormat::None => write_function(&mut writer),
+        ZipFormat::Gzip => write_function(&mut GzEncoder::new(writer, Compression::fast())),
+    }
 }
 
 impl ZipFormat {
