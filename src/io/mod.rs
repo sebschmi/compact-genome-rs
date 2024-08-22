@@ -61,7 +61,7 @@ fn unzip_if_zipped<T>(
 
 /// Wrapper around an output function applying the requested compression.
 fn zip<T>(
-    mut writer: impl Write,
+    writer: impl Write,
     zip_format: ZipFormat,
     write_function: impl FnOnce(&mut dyn Write) -> Result<T, IOError>,
 ) -> Result<T, IOError> {

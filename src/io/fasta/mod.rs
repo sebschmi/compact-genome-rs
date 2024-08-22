@@ -29,7 +29,7 @@ pub struct FastaRecord<Handle> {
 /// Read a fasta file into the given sequence store.
 pub fn read_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
     path: impl AsRef<Path>,
-    store: impl AsMut<SequenceStoreType>,
+    store: &mut SequenceStoreType,
 ) -> Result<Vec<FastaRecord<SequenceStoreType::Handle>>, IOError> {
     let zip_format_hint = ZipFormat::from_path_name(&path);
     let file = File::open(path)?;
@@ -41,7 +41,7 @@ pub fn read_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<
 /// The reader should be buffered for performance.
 pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
     reader: impl Read,
-    mut store: impl AsMut<SequenceStoreType>,
+    store: &mut SequenceStoreType,
 ) -> Result<Vec<FastaRecord<SequenceStoreType::Handle>>, IOError> {
     enum State {
         Init,
@@ -57,7 +57,6 @@ pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alpha
     let mut record_comment = String::new();
     let mut record_sequence_handle: Option<SequenceStoreType::Handle> = None;
 
-    let store = store.as_mut();
     let mut reader = PeekableReader::new(reader);
     let mut state = State::Init;
     let mut buffer = Vec::<u8>::new();
@@ -104,7 +103,9 @@ pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alpha
                         }
                     }
 
-                    if buffer[0].is_ascii_whitespace() {
+                    if buffer[0] == b'\n' || buffer[0] == b'\r' {
+                        break State::RecordSequence;
+                    } else if buffer[0].is_ascii_whitespace() {
                         break State::RecordWhitespace;
                     } else {
                         record_id.push(buffer[0].into());
@@ -126,7 +127,9 @@ pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alpha
                         }
                     }
 
-                    if !buffer[0].is_ascii_whitespace() {
+                    if buffer[0] == b'\n' || buffer[0] == b'\r' {
+                        break State::RecordSequence;
+                    } else if !buffer[0].is_ascii_whitespace() {
                         record_comment.push(buffer[0].into());
                         break State::RecordComment;
                     }
@@ -168,12 +171,16 @@ pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alpha
                 };
             }
             State::EndOfRecord { has_more_records } => {
+                let comment = record_comment.trim_end().to_string();
+                record_comment.clear();
+
                 let sequence_handle = record_sequence_handle
                     .take()
                     .unwrap_or_else(|| store.add_from_slice_u8(&[]).unwrap());
+
                 records.push(FastaRecord {
                     id: mem::take(&mut record_id),
-                    comment: mem::take(&mut record_comment),
+                    comment,
                     sequence_handle,
                 });
 
@@ -237,7 +244,7 @@ impl<'a, Reader: Read> Iterator for FastaSequenceIterator<'a, Reader> {
 pub fn write_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
     path: impl AsRef<Path>,
     records: impl IntoIterator<Item = FastaRecord<SequenceStoreType::Handle>>,
-    store: impl AsRef<SequenceStoreType>,
+    store: &SequenceStoreType,
 ) -> Result<(), IOError> {
     let zip_format = ZipFormat::from_path_name(&path);
     let file = File::create(path)?;
@@ -252,15 +259,14 @@ pub fn write_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore
 pub fn write_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
     mut writer: impl Write,
     records: impl IntoIterator<Item = FastaRecord<SequenceStoreType::Handle>>,
-    store: impl AsRef<SequenceStoreType>,
+    store: &SequenceStoreType,
 ) -> Result<(), IOError> {
-    let store = store.as_ref();
-
     for record in records {
         writeln!(
             writer,
-            ">{id} {comment}",
+            ">{id}{space}{comment}",
             id = record.id,
+            space = if record.comment.is_empty() { "" } else { " " },
             comment = record.comment
         )?;
         let sequence = store.get(&record.sequence_handle);
@@ -271,4 +277,38 @@ pub fn write_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alph
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use core::str;
+
+    use crate::{
+        implementation::DefaultSequenceStore, interface::alphabet::dna_alphabet::DnaAlphabet,
+    };
+
+    use super::{read_fasta, write_fasta};
+
+    #[test]
+    fn test_read_write() {
+        let input_file =
+            b">alt1 comment1\nGGTTGGCCT\n>f2\nACCTG\n>f3 \nAA\n>seq c2  \nGT".as_slice();
+        let expected_output_file =
+            b">alt1 comment1\nGGTTGGCCT\n>f2\nACCTG\n>f3\nAA\n>seq c2\nGT\n".as_slice();
+
+        let mut store = DefaultSequenceStore::<DnaAlphabet>::new();
+        let records = read_fasta(input_file, &mut store).unwrap();
+        let mut output_file = Vec::new();
+        write_fasta(&mut output_file, records, &store).unwrap();
+
+        assert_eq!(
+            expected_output_file,
+            output_file,
+            "expected output:\n{}\n\noutput:\n{}",
+            str::from_utf8(expected_output_file)
+                .unwrap()
+                .replace(' ', "_"),
+            str::from_utf8(&output_file).unwrap().replace(' ', "_"),
+        );
+    }
 }
