@@ -1,13 +1,20 @@
 //! Sequence IO in fasta format.
 
-use std::{fs::File, io::Read, mem, path::Path};
+use std::{
+    fs::File,
+    io::{Read, Write},
+    mem,
+    path::Path,
+};
+
+use traitsequence::interface::Sequence;
 
 use crate::{
     interface::{alphabet::Alphabet, sequence_store::SequenceStore},
     io::{peekable_reader::PeekableReader, unzip_if_zipped},
 };
 
-use super::{error::IOError, ZipFormat};
+use super::{error::IOError, zip, ZipFormat};
 
 /// A fasta record.
 pub struct FastaRecord<Handle> {
@@ -32,12 +39,8 @@ pub fn read_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<
 
 /// Read fasta data into the given sequence store.
 /// The reader should be buffered for performance.
-pub fn read_fasta<
-    Reader: Read,
-    AlphabetType: Alphabet,
-    SequenceStoreType: SequenceStore<AlphabetType>,
->(
-    reader: Reader,
+pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
+    reader: impl Read,
     mut store: impl AsMut<SequenceStoreType>,
 ) -> Result<Vec<FastaRecord<SequenceStoreType::Handle>>, IOError> {
     enum State {
@@ -228,4 +231,44 @@ impl<'a, Reader: Read> Iterator for FastaSequenceIterator<'a, Reader> {
             }
         }
     }
+}
+
+/// Write a fasta file from the given records.
+pub fn write_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
+    path: impl AsRef<Path>,
+    records: impl IntoIterator<Item = FastaRecord<SequenceStoreType::Handle>>,
+    store: impl AsRef<SequenceStoreType>,
+) -> Result<(), IOError> {
+    let zip_format = ZipFormat::from_path_name(&path);
+    let file = File::create(path)?;
+
+    zip(file, zip_format, |writer| {
+        write_fasta(writer, records, store)
+    })
+}
+
+/// Write fasta data into the given sequence store.
+/// The writer should be buffered for performance.
+pub fn write_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
+    mut writer: impl Write,
+    records: impl IntoIterator<Item = FastaRecord<SequenceStoreType::Handle>>,
+    store: impl AsRef<SequenceStoreType>,
+) -> Result<(), IOError> {
+    let store = store.as_ref();
+
+    for record in records {
+        writeln!(
+            writer,
+            ">{id} {comment}",
+            id = record.id,
+            comment = record.comment
+        )?;
+        let sequence = store.get(&record.sequence_handle);
+        for character in sequence.iter() {
+            write!(writer, "{character}")?;
+        }
+        writeln!(writer)?;
+    }
+
+    Ok(())
 }

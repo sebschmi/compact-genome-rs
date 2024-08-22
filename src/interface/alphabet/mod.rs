@@ -1,13 +1,16 @@
 //! Alphabets for genome sequences.
 
-use std::convert::{TryFrom, TryInto};
+use std::{
+    convert::{TryFrom, TryInto},
+    fmt::Display,
+};
 use thiserror::Error;
 
 pub mod dna_alphabet;
 pub mod dna_alphabet_or_n;
 
 /// A character in an alphabet.
-pub trait AlphabetCharacter: Into<u8> + TryFrom<u8> {
+pub trait AlphabetCharacter: Into<u8> + TryFrom<u8> + Display {
     /// The amount of characters in the alphabet.
     const ALPHABET_SIZE: usize;
 

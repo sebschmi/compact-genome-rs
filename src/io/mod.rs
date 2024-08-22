@@ -1,6 +1,6 @@
 //! Various methods of inputting and outputting sequences.
 
-use std::io::{BufReader, Read, Seek, Write};
+use std::io::{BufReader, BufWriter, Read, Seek, Write};
 
 use error::IOError;
 use flate2::{bufread::GzDecoder, write::GzEncoder, Compression};
@@ -66,7 +66,7 @@ fn zip<T>(
     write_function: impl FnOnce(&mut dyn Write) -> Result<T, IOError>,
 ) -> Result<T, IOError> {
     match zip_format {
-        ZipFormat::None => write_function(&mut writer),
+        ZipFormat::None => write_function(&mut BufWriter::new(writer)),
         ZipFormat::Gzip => write_function(&mut GzEncoder::new(writer, Compression::fast())),
     }
 }
