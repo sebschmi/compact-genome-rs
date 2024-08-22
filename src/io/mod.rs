@@ -19,11 +19,11 @@ enum ZipFormat {
 /// Wrapper around a parsing function to handle a zipped stream.
 ///
 /// The `reader` should not be buffered, as buffering will be added by this method.
-fn unzip_if_zipped(
+fn unzip_if_zipped<T>(
     mut reader: impl Read + Seek,
     zip_format_hint: ZipFormat,
-    parse_function: impl FnOnce(&mut dyn Read) -> Result<(), IOError>,
-) -> Result<(), IOError> {
+    parse_function: impl FnOnce(&mut dyn Read) -> Result<T, IOError>,
+) -> Result<T, IOError> {
     // Try the formats in the following order:
     // * the hinted format first
     // * then all the formats that have headers, i.e. all zip formats
