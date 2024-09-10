@@ -5,6 +5,7 @@ use crate::interface::sequence::{GenomeSequenceMut, OwnedGenomeSequence};
 use std::marker::PhantomData;
 
 /// Returns an iterator over the genome sequences that are exactly one substitution away from this genome sequence.
+/// 
 /// In other words, all sequences with hamming distance one of the same length.
 /// While the returned type works like an iterator, it does not implement the iterator trait due to limitations of the type system.
 pub fn substitution_distance_one_neighbor_iterator<
@@ -20,6 +21,7 @@ pub fn substitution_distance_one_neighbor_iterator<
 }
 
 /// An iterator over the genome sequences that are exactly one substitution away from the given genome sequence.
+/// 
 /// In other words, all sequences with hamming distance one of the same length.
 /// While the type works like an iterator, it does not implement the iterator trait due to limitations of the type system.
 pub struct SubstitutionDistanceOneNeighborIterator<
