@@ -91,8 +91,8 @@ impl<
 
 #[cfg(test)]
 mod tests {
+    use crate::implementation::alphabets::dna_alphabet::DnaAlphabet;
     use crate::implementation::vec_sequence::VectorGenome;
-    use crate::interface::alphabet::dna_alphabet::DnaAlphabet;
     use crate::interface::sequence::neighbor_iterators::substitution_distance_one_neighbor_iterator;
     use crate::interface::sequence::OwnedGenomeSequence;
 

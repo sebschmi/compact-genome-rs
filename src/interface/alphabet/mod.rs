@@ -6,11 +6,8 @@ use std::{
 };
 use thiserror::Error;
 
-pub mod dna_alphabet;
-pub mod dna_alphabet_or_n;
-
 /// A character in an alphabet.
-pub trait AlphabetCharacter: Into<u8> + TryFrom<u8> + Display {
+pub trait AlphabetCharacter: Into<u8> + Into<char> + TryFrom<u8> + TryFrom<char> + Display {
     /// The amount of characters in the alphabet.
     const ALPHABET_SIZE: usize;
 

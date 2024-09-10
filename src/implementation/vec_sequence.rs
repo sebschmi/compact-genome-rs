@@ -333,8 +333,8 @@ impl<AlphabetType: Alphabet> From<VectorGenome<AlphabetType>> for Vec<AlphabetTy
 
 #[cfg(test)]
 mod tests {
+    use crate::implementation::alphabets::dna_alphabet::DnaAlphabet;
     use crate::implementation::vec_sequence::VectorGenome;
-    use crate::interface::alphabet::dna_alphabet::DnaAlphabet;
     use crate::interface::sequence::{GenomeSequence, OwnedGenomeSequence};
 
     #[test]

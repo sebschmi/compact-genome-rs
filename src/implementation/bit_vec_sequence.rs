@@ -370,8 +370,8 @@ pub(crate) const fn alphabet_character_bit_width(size: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
+    use crate::implementation::alphabets::dna_alphabet::DnaAlphabet;
     use crate::implementation::bit_vec_sequence::BitVectorGenome;
-    use crate::interface::alphabet::dna_alphabet::DnaAlphabet;
     use crate::interface::alphabet::Alphabet;
     use crate::interface::sequence::{EditableGenomeSequence, GenomeSequence, OwnedGenomeSequence};
 

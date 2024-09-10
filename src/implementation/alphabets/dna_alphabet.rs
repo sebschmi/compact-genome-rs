@@ -24,6 +24,12 @@ impl From<DnaCharacter> for u8 {
     }
 }
 
+impl From<DnaCharacter> for char {
+    fn from(character: DnaCharacter) -> Self {
+        u8::from(character).into()
+    }
+}
+
 static ASCII_TO_DNA_CHARACTER_TABLE: [u8; 256] = [
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -45,6 +51,18 @@ impl TryFrom<u8> for DnaCharacter {
             Err(())
         } else {
             Ok(Self { character })
+        }
+    }
+}
+
+impl TryFrom<char> for DnaCharacter {
+    type Error = ();
+
+    fn try_from(character: char) -> Result<Self, Self::Error> {
+        if character.is_ascii() {
+            u8::try_from(character).map_err(|_| ())?.try_into()
+        } else {
+            Err(())
         }
     }
 }
@@ -117,7 +135,7 @@ impl Display for DnaCharacter {
 
 #[cfg(test)]
 mod tests {
-    use crate::interface::alphabet::dna_alphabet::DnaCharacter;
+    use crate::implementation::alphabets::dna_alphabet::DnaCharacter;
     use std::convert::TryFrom;
 
     #[test]

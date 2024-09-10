@@ -1,3 +1,4 @@
+pub mod alphabets;
 pub mod array_kmer;
 pub mod bit_array_kmer;
 pub mod bit_vec_sequence;

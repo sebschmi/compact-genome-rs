@@ -284,7 +284,7 @@ mod tests {
     use core::str;
 
     use crate::{
-        implementation::DefaultSequenceStore, interface::alphabet::dna_alphabet::DnaAlphabet,
+        implementation::alphabets::dna_alphabet::DnaAlphabet, implementation::DefaultSequenceStore,
     };
 
     use super::{read_fasta, write_fasta};

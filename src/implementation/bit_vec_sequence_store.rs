@@ -144,9 +144,9 @@ impl<AlphabetType: Alphabet> HandleWithSubsequence<core::ops::Range<usize>>
 
 #[cfg(test)]
 mod tests {
+    use crate::implementation::alphabets::dna_alphabet::DnaAlphabet;
     use crate::implementation::bit_vec_sequence_store::BitVectorSequenceStore;
     use crate::implementation::vec_sequence::VectorGenome;
-    use crate::interface::alphabet::dna_alphabet::DnaAlphabet;
     use crate::interface::sequence::{GenomeSequence, OwnedGenomeSequence};
     use crate::interface::sequence_store::{InverseMappingSequenceStore, SequenceStore};
 
