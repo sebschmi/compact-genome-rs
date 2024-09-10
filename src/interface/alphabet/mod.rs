@@ -17,10 +17,10 @@ pub trait AlphabetCharacter: Into<u8> + TryFrom<u8> + Display {
     /// The index of this character in the alphabet.
     fn index(&self) -> usize;
 
-    /// Constructs the character from the given index, returning `None` if it is invalid.
+    /// Constructs the character from the given index, returning `Err` if it is invalid.
     fn from_index(index: usize) -> Result<Self, AlphabetError>;
 
-    /// Constructs the character from the given index, returning `None` if it is invalid.
+    /// Constructs the character from the given index, returning `Err` if it is invalid.
     /// This method returns a static reference to the character type, so it can only be implemented via lookup in a static table.
     /// It is required to create an implementation of [std::ops::Index] for genome sequence types that do not store the characters in plain format.
     fn from_index_ref(index: usize) -> Result<&'static Self, AlphabetError>;
@@ -38,7 +38,7 @@ pub trait Alphabet: Sized {
     type CharacterType: AlphabetCharacter + Eq + Ord + Clone + 'static;
 
     /// Converts the given ASCII character into an alphabet character.
-    /// If the ASCII character is not mapped to an alphabet character, then `None` is returned.
+    /// If the ASCII character is not mapped to an alphabet character, then `Err` is returned.
     fn ascii_to_character(ascii: u8) -> Result<Self::CharacterType, AlphabetError> {
         ascii
             .try_into()
