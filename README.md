@@ -7,4 +7,4 @@
 A Rust crate to represent a genome string in memory.
 
 The crate defines trait abstractions over a genome string, and provides different compact implementations.
-At the moment, only the basic ASCII representation of the base characters is supported though.
+At the moment, a bitpacked representation along with a basic ASCII representation of the base characters is supported.
