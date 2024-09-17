@@ -64,6 +64,29 @@ impl<AlphabetType: Alphabet + 'static> SequenceStore<AlphabetType>
         }
     }
 
+    fn add_from_iter(
+        &mut self,
+        iter: impl IntoIterator<Item = <AlphabetType as Alphabet>::CharacterType>,
+    ) -> Self::Handle {
+        let offset = self.sequence.len();
+        let iter = iter.into_iter();
+        let (size, _) = iter.size_hint();
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+        self.sequence.bits.reserve(size * bit_width);
+        for character in iter {
+            self.sequence
+                .bits
+                .extend_from_bitslice(&character.index().view_bits::<Lsb0>()[0..bit_width]);
+        }
+
+        let len = self.sequence.len() - offset;
+        Self::Handle {
+            offset,
+            len,
+            phantom_data: Default::default(),
+        }
+    }
+
     fn add_from_iter_u8<IteratorType: IntoIterator<Item = u8>>(
         &mut self,
         iter: IteratorType,

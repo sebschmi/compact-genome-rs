@@ -25,7 +25,16 @@ pub trait SequenceStore<AlphabetType: Alphabet> {
     /// Adds a sequence to this store and returns a handle for later retrieval.
     /// Handles do not borrow the sequence store, so they can exist while the store is modified.
     ///
-    /// This method expects an `IntoIter` over ASCII characters, and returns `None` if any of the characters is not part of the alphabet.
+    /// This method expects an `IntoIterator` over alphabet characters.
+    fn add_from_iter(
+        &mut self,
+        iter: impl IntoIterator<Item = AlphabetType::CharacterType>,
+    ) -> Self::Handle;
+
+    /// Adds a sequence to this store and returns a handle for later retrieval.
+    /// Handles do not borrow the sequence store, so they can exist while the store is modified.
+    ///
+    /// This method expects an `IntoIterator` over ASCII characters, and returns and error if any of the characters is not part of the alphabet.
     fn add_from_iter_u8<IteratorType: IntoIterator<Item = u8>>(
         &mut self,
         iter: IteratorType,
@@ -34,7 +43,7 @@ pub trait SequenceStore<AlphabetType: Alphabet> {
     /// Adds a sequence to this store and returns a handle for later retrieval.
     /// Handles do not borrow the sequence store, so they can exist while the store is modified.
     ///
-    /// This method expects slice of ASCII characters, and returns `None` if any of the characters is not part of the alphabet.
+    /// This method expects slice of ASCII characters, and returns an error if any of the characters is not part of the alphabet.
     fn add_from_slice_u8(&mut self, slice: &[u8]) -> Result<Self::Handle, AlphabetError> {
         self.add_from_iter_u8(slice.iter().copied())
     }
