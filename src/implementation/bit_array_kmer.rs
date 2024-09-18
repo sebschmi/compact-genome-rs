@@ -17,7 +17,7 @@ use std::ops::{Index, Range};
 use traitsequence::interface::{OwnedSequence, Sequence};
 
 /// A k-mer stored as array of minimum-bit characters.
-#[derive(Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
+#[derive(Debug)]
 pub struct BitArrayKmer<const K: usize, AlphabetType: Alphabet, BitArrayType = usize>
 where
     BitArrayType: BitViewSized + BitStore,
@@ -154,6 +154,43 @@ impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitSto
 impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore + Copy> Copy
     for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
+}
+
+impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore> PartialEq
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.array == other.array
+    }
+}
+
+impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore> Eq
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
+{
+}
+
+impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore> PartialOrd
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore> Ord
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.array.cmp(&other.array)
+    }
+}
+
+impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore> core::hash::Hash
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
+{
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.array.hash(state)
+    }
 }
 
 #[cfg(feature = "serde")]
