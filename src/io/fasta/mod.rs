@@ -31,33 +31,25 @@ pub struct FastaRecord<Handle> {
 }
 
 /// Read a fasta file into the given sequence store.
+///
+/// If `skip_invalid_characters` is set, then invalid characters are skipped.
+/// If `capitalise_characters` is set, then lower-case characters are parsed as upper-case.
 pub fn read_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
     path: impl AsRef<Path>,
     store: &mut SequenceStoreType,
+    skip_invalid_characters: bool,
+    capitalise_characters: bool,
 ) -> Result<Vec<FastaRecord<SequenceStoreType::Handle>>, IOError> {
     let zip_format_hint = ZipFormat::from_path_name(&path);
     let file = File::open(path)?;
 
     unzip_if_zipped(file, zip_format_hint, |reader| {
-        read_fasta(reader, store, false)
-    })
-}
-
-/// Read a fasta file into the given sequence store.
-///
-/// Invalid characters are skipped.
-pub fn read_fuzzy_fasta_file<
-    AlphabetType: Alphabet,
-    SequenceStoreType: SequenceStore<AlphabetType>,
->(
-    path: impl AsRef<Path>,
-    store: &mut SequenceStoreType,
-) -> Result<Vec<FastaRecord<SequenceStoreType::Handle>>, IOError> {
-    let zip_format_hint = ZipFormat::from_path_name(&path);
-    let file = File::open(path)?;
-
-    unzip_if_zipped(file, zip_format_hint, |reader| {
-        read_fasta(reader, store, true)
+        read_fasta(
+            reader,
+            store,
+            skip_invalid_characters,
+            capitalise_characters,
+        )
     })
 }
 
@@ -67,6 +59,7 @@ pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alpha
     reader: impl Read,
     store: &mut SequenceStoreType,
     skip_invalid_characters: bool,
+    capitalise_characters: bool,
 ) -> Result<Vec<FastaRecord<SequenceStoreType::Handle>>, IOError> {
     enum State {
         Init,
@@ -189,6 +182,7 @@ pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alpha
                     result: None,
                     newline: true,
                     skip_invalid_characters,
+                    capitalise_characters,
                     phantom_data: PhantomData::<AlphabetType>,
                 };
 
@@ -232,6 +226,7 @@ struct FastaSequenceIterator<'a, AlphabetType, Reader> {
     result: Option<Result<bool, IOError>>,
     newline: bool,
     skip_invalid_characters: bool,
+    capitalise_characters: bool,
     phantom_data: PhantomData<AlphabetType>,
 }
 
@@ -263,14 +258,19 @@ impl<'a, AlphabetType: Alphabet, Reader: Read> Iterator
                 return None;
             } else if self.buffer[0] != b'\n' && self.buffer[0] != b'\r' {
                 self.newline = false;
-                match AlphabetType::CharacterType::try_from(self.buffer[0]) {
+
+                let ascii = if self.capitalise_characters {
+                    self.buffer[0].to_ascii_uppercase()
+                } else {
+                    self.buffer[0]
+                };
+
+                match AlphabetType::CharacterType::try_from(ascii) {
                     Ok(character) => return Some(character),
                     Err(_) => {
                         if !self.skip_invalid_characters {
                             self.result = Some(Err(IOError::AlphabetError(
-                                AlphabetError::AsciiNotPartOfAlphabet {
-                                    ascii: self.buffer[0],
-                                },
+                                AlphabetError::AsciiNotPartOfAlphabet { ascii },
                             )));
                             return None;
                         }
@@ -340,7 +340,7 @@ mod tests {
             b">alt1 comment1\nGGTTGGCCT\n>f2\nACCTG\n>f3\nAA\n>seq c2\nGT\n".as_slice();
 
         let mut store = DefaultSequenceStore::<DnaAlphabet>::new();
-        let records = read_fasta(input_file, &mut store, false).unwrap();
+        let records = read_fasta(input_file, &mut store, false, false).unwrap();
         let mut output_file = Vec::new();
         write_fasta(&mut output_file, records, &store).unwrap();
 
@@ -358,12 +358,12 @@ mod tests {
     #[test]
     fn test_invalid_characters() {
         let input_file =
-            b">alt1 comment1\nGGTTZGGCCT\n>f2\nACCUTG\n>f3 \nAA\n>seq c2  \nGaT".as_slice();
+            b">alt1 comment1\nGGTTZGGCCT\n>f2\nACCUTG\n>f3 \nAA\n>seq c2  \ngxT".as_slice();
         let expected_output_file =
             b">alt1 comment1\nGGTTGGCCT\n>f2\nACCTG\n>f3\nAA\n>seq c2\nGT\n".as_slice();
 
         let mut store = DefaultSequenceStore::<DnaAlphabet>::new();
-        let records = read_fasta(input_file, &mut store, true).unwrap();
+        let records = read_fasta(input_file, &mut store, true, true).unwrap();
         let mut output_file = Vec::new();
         write_fasta(&mut output_file, records, &store).unwrap();
 
