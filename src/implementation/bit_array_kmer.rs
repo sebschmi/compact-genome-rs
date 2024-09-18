@@ -8,6 +8,8 @@ use crate::interface::k_mer::{Kmer, OwnedKmer};
 use crate::interface::sequence::{GenomeSequence, OwnedGenomeSequence};
 use bitvec::array::BitArray;
 use bitvec::field::BitField;
+use bitvec::store::BitStore;
+use bitvec::view::BitView;
 pub use bitvec::view::BitViewSized;
 use ref_cast::RefCast;
 use std::marker::PhantomData;
@@ -16,74 +18,94 @@ use traitsequence::interface::{OwnedSequence, Sequence};
 
 /// A k-mer stored as array of minimum-bit characters.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
-pub struct BitArrayKmer<const K: usize, BitArrayType: BitViewSized, AlphabetType: Alphabet> {
+pub struct BitArrayKmer<const K: usize, AlphabetType: Alphabet, BitArrayType = usize>
+where
+    BitArrayType: BitViewSized + BitStore,
+{
     phantom_data: PhantomData<AlphabetType>,
     array: BitArray<BitArrayType>,
 }
 
-impl<const K: usize, AlphabetType: Alphabet> Kmer<K, AlphabetType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorSubGenome<AlphabetType>
+impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore>
+    Kmer<K, AlphabetType, BitVectorSubGenome<AlphabetType, BitArrayType>>
+    for BitVectorSubGenome<AlphabetType, BitArrayType>
 {
 }
 
-macro_rules! implement_bit_array_kmer {
-    ($K:expr, $BitArrayType:ty) => {
-impl<AlphabetType: Alphabet>
-OwnedKmer<$K, AlphabetType, BitVectorSubGenome<AlphabetType>> for BitArrayKmer<$K, $BitArrayType, AlphabetType>
+impl<
+        const K: usize,
+        AlphabetType: Alphabet,
+        BitArrayType: BitViewSized + BitStore + BitView<Store = BitArrayType>,
+    > OwnedKmer<K, AlphabetType, BitVectorSubGenome<AlphabetType, BitArrayType>>
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
 }
 
-impl<AlphabetType: Alphabet>
-GenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>> for BitArrayKmer<$K, $BitArrayType, AlphabetType>
+impl<
+        const K: usize,
+        AlphabetType: Alphabet,
+        BitArrayType: BitViewSized + BitStore + BitView<Store = BitArrayType>,
+    > GenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType, BitArrayType>>
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
-    fn as_genome_subsequence(&self) -> &BitVectorSubGenome<AlphabetType> {
-        BitVectorSubGenome::ref_cast(&self.array[..])
+    fn as_genome_subsequence(&self) -> &BitVectorSubGenome<AlphabetType, BitArrayType> {
+        BitVectorSubGenome::ref_cast(self.array.as_bitslice())
     }
 }
 
-impl<AlphabetType: Alphabet>
-Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
-for BitArrayKmer<$K, $BitArrayType, AlphabetType>
+impl<
+        const K: usize,
+        AlphabetType: Alphabet,
+        BitArrayType: BitViewSized + BitStore + BitView<Store = BitArrayType>,
+    > Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitArrayType>>
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
-    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType> where Self: 'a, AlphabetType::CharacterType: 'a;
+    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType, BitArrayType> where Self: 'a, AlphabetType::CharacterType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         self.as_genome_subsequence().iter()
     }
 
     fn len(&self) -> usize {
-        $K
+        K
     }
 }
 
-impl<AlphabetType: Alphabet>
-OwnedGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>> for BitArrayKmer<$K, $BitArrayType, AlphabetType>
+impl<
+        const K: usize,
+        AlphabetType: Alphabet,
+        BitArrayType: BitViewSized + BitStore + BitView<Store = BitArrayType>,
+    > OwnedGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType, BitArrayType>>
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
 }
 
-impl<AlphabetType: Alphabet>
-OwnedSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
-for BitArrayKmer<$K, $BitArrayType, AlphabetType>
+impl<
+        const K: usize,
+        AlphabetType: Alphabet,
+        BitArrayType: BitViewSized + BitStore + BitView<Store = BitArrayType>,
+    > OwnedSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitArrayType>>
+    for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
 }
 
-impl<AlphabetType: Alphabet> FromIterator<AlphabetType::CharacterType>
-for BitArrayKmer<$K, $BitArrayType, AlphabetType>
+impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore>
+    FromIterator<AlphabetType::CharacterType> for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
     fn from_iter<T: IntoIterator<Item = AlphabetType::CharacterType>>(iter: T) -> Self {
-        let mut array: BitArray<$BitArrayType> = <$BitArrayType>::default().into();
+        let mut array: BitArray<BitArrayType> =
+            <BitArrayType as BitViewSized>::ZERO.into_bitarray();
         let mut iter = iter.into_iter();
 
-        for index in 0..$K {
+        for index in 0..K {
             let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
-        let offset = index * bit_width;
-        let limit = (index + 1) * bit_width;
+            let offset = index * bit_width;
+            let limit = (index + 1) * bit_width;
 
             let character = iter.next().unwrap();
             array[offset..limit].store(character.index());
         }
         assert!(iter.next().is_none());
-
 
         Self {
             phantom_data: Default::default(),
@@ -92,23 +114,28 @@ for BitArrayKmer<$K, $BitArrayType, AlphabetType>
     }
 }
 
-impl<AlphabetType: Alphabet> Index<Range<usize>> for BitArrayKmer<$K, $BitArrayType, AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<
+        const K: usize,
+        AlphabetType: Alphabet,
+        BitArrayType: BitViewSized + BitStore + BitView<Store = BitArrayType>,
+    > Index<Range<usize>> for BitArrayKmer<K, AlphabetType, BitArrayType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitArrayType>;
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<usize> for BitArrayKmer<$K, $BitArrayType, AlphabetType> {
+impl<
+        const K: usize,
+        AlphabetType: Alphabet,
+        BitArrayType: BitViewSized + BitStore + BitView<Store = BitArrayType>,
+    > Index<usize> for BitArrayKmer<K, AlphabetType, BitArrayType>
+{
     type Output = AlphabetType::CharacterType;
 
     fn index(&self, index: usize) -> &Self::Output {
         self.as_genome_subsequence().index(index)
     }
 }
-
-    }
-}
-
-implement_bit_array_kmer!(1, [usize; 1]);
