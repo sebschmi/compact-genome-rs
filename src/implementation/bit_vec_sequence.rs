@@ -13,32 +13,44 @@ use traitsequence::interface::{EditableSequence, OwnedSequence, Sequence};
 
 /// A genome sequence stored as vector of minimum-bit characters.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct BitVectorGenome<AlphabetType: Alphabet> {
+pub struct BitVectorGenome<AlphabetType: Alphabet, BitStoreType = usize>
+where
+    BitStoreType: BitStore,
+{
     phantom_data: PhantomData<AlphabetType>,
     /// Stores the sequence as minimum-bit characters.
-    pub(crate) bits: BitVec,
+    pub(crate) bits: BitVec<BitStoreType>,
 }
 
 /// The subsequence of a genome sequence stored as vector of minimum-bit characters.
 #[derive(RefCast, Debug, Eq, PartialEq, Hash)]
 #[repr(transparent)]
-pub struct BitVectorSubGenome<AlphabetType: Alphabet> {
+pub struct BitVectorSubGenome<AlphabetType: Alphabet, BitStoreType = usize>
+where
+    BitStoreType: BitStore,
+{
     phantom_data: PhantomData<AlphabetType>,
-    pub(crate) bits: BitSlice,
+    pub(crate) bits: BitSlice<BitStoreType>,
 }
 
 /// An iterator over a [BitVectorGenome].
-pub struct BitVectorGenomeIterator<AlphabetType: Alphabet> {
+pub struct BitVectorGenomeIterator<AlphabetType: Alphabet, BitStoreType = usize>
+where
+    BitStoreType: BitStore,
+{
     current: usize,
-    sequence: BitVectorGenome<AlphabetType>,
+    sequence: BitVectorGenome<AlphabetType, BitStoreType>,
 }
 
 /// An iterator over a [BitVectorSubGenome].
-pub struct BitVectorSubGenomeIterator<'a, AlphabetType: Alphabet> {
-    slice: &'a BitVectorSubGenome<AlphabetType>,
+pub struct BitVectorSubGenomeIterator<'a, AlphabetType: Alphabet, BitStoreType = usize>
+where
+    BitStoreType: BitStore,
+{
+    slice: &'a BitVectorSubGenome<AlphabetType, BitStoreType>,
 }
 
-impl<AlphabetType: Alphabet> BitVectorGenome<AlphabetType> {
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> BitVectorGenome<AlphabetType, BitStoreType> {
     /// Returns the amount of memory this genome sequence uses in bytes.
     /// This is meant to be accurate, but might be off by a constant number of bytes.
     pub fn size_in_memory(&self) -> usize {
@@ -46,10 +58,11 @@ impl<AlphabetType: Alphabet> BitVectorGenome<AlphabetType> {
     }
 }
 
-impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
 {
-    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType> where AlphabetType: 'a;
+    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType, BitStoreType> where AlphabetType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         self.as_genome_subsequence().iter()
@@ -60,10 +73,11 @@ impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, BitVectorSubG
     }
 }
 
-impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorSubGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
 {
-    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType> where AlphabetType: 'a;
+    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType, BitStoreType> where AlphabetType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         BitVectorSubGenomeIterator { slice: self }
@@ -74,9 +88,9 @@ impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, BitVectorSubG
     }
 }
 
-impl<AlphabetType: Alphabet>
-    EditableSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    EditableSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
 {
     fn split_off(&mut self, at: usize) -> Self {
         Self {
@@ -86,55 +100,69 @@ impl<AlphabetType: Alphabet>
     }
 }
 
-impl<AlphabetType: Alphabet> Index<Range<usize>> for BitVectorGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<Range<usize>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeFrom<usize>> for BitVectorGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeFrom<usize>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeTo<usize>> for BitVectorGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeTo<usize>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeTo<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeFull> for BitVectorGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeFull>
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeFull) -> &Self::Output {
         self.as_genome_subsequence().index(index)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeInclusive<usize>> for BitVectorGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeInclusive<usize>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeInclusive<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeToInclusive<usize>> for BitVectorGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeToInclusive<usize>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeToInclusive<usize>) -> &Self::Output {
         self.as_genome_subsequence().index(index)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<usize> for BitVectorGenome<AlphabetType> {
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<usize>
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
     type Output = AlphabetType::CharacterType;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -142,8 +170,10 @@ impl<AlphabetType: Alphabet> Index<usize> for BitVectorGenome<AlphabetType> {
     }
 }
 
-impl<AlphabetType: Alphabet> Index<Range<usize>> for BitVectorSubGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<Range<usize>>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
@@ -151,32 +181,40 @@ impl<AlphabetType: Alphabet> Index<Range<usize>> for BitVectorSubGenome<Alphabet
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeFrom<usize>> for BitVectorSubGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeFrom<usize>>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
         self.index(index.start..self.len())
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeTo<usize>> for BitVectorSubGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeTo<usize>>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeTo<usize>) -> &Self::Output {
         self.index(0..index.end)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeFull> for BitVectorSubGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeFull>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, _index: RangeFull) -> &Self::Output {
         self.index(0..self.len())
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeInclusive<usize>> for BitVectorSubGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeInclusive<usize>>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeInclusive<usize>) -> &Self::Output {
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
@@ -186,15 +224,19 @@ impl<AlphabetType: Alphabet> Index<RangeInclusive<usize>> for BitVectorSubGenome
     }
 }
 
-impl<AlphabetType: Alphabet> Index<RangeToInclusive<usize>> for BitVectorSubGenome<AlphabetType> {
-    type Output = BitVectorSubGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<RangeToInclusive<usize>>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
+{
+    type Output = BitVectorSubGenome<AlphabetType, BitStoreType>;
 
     fn index(&self, index: RangeToInclusive<usize>) -> &Self::Output {
         self.index(0..=index.end)
     }
 }
 
-impl<AlphabetType: Alphabet> Index<usize> for BitVectorSubGenome<AlphabetType> {
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<usize>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
+{
     type Output = AlphabetType::CharacterType;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -206,8 +248,8 @@ impl<AlphabetType: Alphabet> Index<usize> for BitVectorSubGenome<AlphabetType> {
     }
 }
 
-impl<AlphabetType: Alphabet> FromIterator<AlphabetType::CharacterType>
-    for BitVectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> FromIterator<AlphabetType::CharacterType>
+    for BitVectorGenome<AlphabetType, BitStoreType>
 {
     fn from_iter<T: IntoIterator<Item = AlphabetType::CharacterType>>(iter: T) -> Self {
         let mut result = Self::default();
@@ -216,7 +258,9 @@ impl<AlphabetType: Alphabet> FromIterator<AlphabetType::CharacterType>
     }
 }
 
-impl<AlphabetType: Alphabet> Extend<AlphabetType::CharacterType> for BitVectorGenome<AlphabetType> {
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Extend<AlphabetType::CharacterType>
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
     fn extend<T: IntoIterator<Item = AlphabetType::CharacterType>>(&mut self, iter: T) {
         let iter = iter.into_iter();
         let (size, _) = iter.size_hint();
@@ -231,9 +275,11 @@ impl<AlphabetType: Alphabet> Extend<AlphabetType::CharacterType> for BitVectorGe
     }
 }
 
-impl<AlphabetType: Alphabet> IntoIterator for BitVectorGenome<AlphabetType> {
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> IntoIterator
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
     type Item = AlphabetType::CharacterType;
-    type IntoIter = BitVectorGenomeIterator<AlphabetType>;
+    type IntoIter = BitVectorGenomeIterator<AlphabetType, BitStoreType>;
 
     fn into_iter(self) -> Self::IntoIter {
         BitVectorGenomeIterator {
@@ -243,7 +289,9 @@ impl<AlphabetType: Alphabet> IntoIterator for BitVectorGenome<AlphabetType> {
     }
 }
 
-impl<AlphabetType: Alphabet> Iterator for BitVectorGenomeIterator<AlphabetType> {
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Iterator
+    for BitVectorGenomeIterator<AlphabetType, BitStoreType>
+{
     type Item = AlphabetType::CharacterType;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -257,7 +305,9 @@ impl<AlphabetType: Alphabet> Iterator for BitVectorGenomeIterator<AlphabetType> 
     }
 }
 
-impl<'iter, AlphabetType: Alphabet> Iterator for BitVectorSubGenomeIterator<'iter, AlphabetType> {
+impl<'iter, AlphabetType: Alphabet, BitStoreType: BitStore> Iterator
+    for BitVectorSubGenomeIterator<'iter, AlphabetType, BitStoreType>
+{
     type Item = &'iter AlphabetType::CharacterType;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -271,8 +321,8 @@ impl<'iter, AlphabetType: Alphabet> Iterator for BitVectorSubGenomeIterator<'ite
     }
 }
 
-impl<'a, AlphabetType: Alphabet> DoubleEndedIterator
-    for BitVectorSubGenomeIterator<'a, AlphabetType>
+impl<'a, AlphabetType: Alphabet, BitStoreType: BitStore> DoubleEndedIterator
+    for BitVectorSubGenomeIterator<'a, AlphabetType, BitStoreType>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.slice.len() > 0 {
@@ -285,37 +335,43 @@ impl<'a, AlphabetType: Alphabet> DoubleEndedIterator
     }
 }
 
-impl<AlphabetType: Alphabet> Borrow<BitVectorSubGenome<AlphabetType>>
-    for BitVectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    Borrow<BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
 {
-    fn borrow(&self) -> &BitVectorSubGenome<AlphabetType> {
+    fn borrow(&self) -> &BitVectorSubGenome<AlphabetType, BitStoreType> {
         self.as_genome_subsequence()
     }
 }
 
-impl<AlphabetType: Alphabet> ToOwned for BitVectorSubGenome<AlphabetType> {
-    type Owned = BitVectorGenome<AlphabetType>;
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> ToOwned
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
+{
+    type Owned = BitVectorGenome<AlphabetType, BitStoreType>;
 
     fn to_owned(&self) -> Self::Owned {
         self.iter().cloned().collect()
     }
 }
 
-impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    GenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
 {
-    fn as_genome_subsequence(&self) -> &BitVectorSubGenome<AlphabetType> {
+    fn as_genome_subsequence(&self) -> &BitVectorSubGenome<AlphabetType, BitStoreType> {
         BitVectorSubGenome::ref_cast(&self.bits[..])
     }
 }
 
-impl<AlphabetType: Alphabet> OwnedGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    OwnedGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
 {
 }
 
-impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    EditableGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
 {
     fn reserve(&mut self, additional: usize) {
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
@@ -344,18 +400,21 @@ impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, BitVectorSubGe
     }
 }
 
-impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorSubGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    GenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorSubGenome<AlphabetType, BitStoreType>
 {
 }
 
-impl<AlphabetType: Alphabet>
-    OwnedSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType>>
-    for BitVectorGenome<AlphabetType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore>
+    OwnedSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitStoreType>>
+    for BitVectorGenome<AlphabetType, BitStoreType>
 {
 }
 
-impl<AlphabetType: Alphabet> Default for BitVectorGenome<AlphabetType> {
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Default
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
     fn default() -> Self {
         Self {
             phantom_data: Default::default(),
