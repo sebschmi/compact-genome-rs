@@ -8,7 +8,7 @@ use crate::interface::k_mer::{Kmer, OwnedKmer};
 use crate::interface::sequence::{GenomeSequence, OwnedGenomeSequence};
 use bitvec::array::BitArray;
 use bitvec::field::BitField;
-use bitvec::view::BitViewSized;
+pub use bitvec::view::BitViewSized;
 use ref_cast::RefCast;
 use std::marker::PhantomData;
 use std::ops::{Index, Range};
