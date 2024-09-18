@@ -7,12 +7,14 @@ use std::fmt::{Display, Formatter};
 
 /// A character of a DNA alphabet: A, C, G or T.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DnaCharacter {
     character: u8,
 }
 
 /// The DNA alphabet, consisting of characters A, C, G and T.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DnaAlphabet;
 
 static DNA_CHARACTER_TO_ASCII_TABLE: [u8; DnaCharacter::ALPHABET_SIZE] = [b'A', b'C', b'G', b'T'];
