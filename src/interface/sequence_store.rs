@@ -50,8 +50,10 @@ pub trait SequenceStore<AlphabetType: Alphabet> {
 
     /// Returns a reference to a sequence in this store, given the handle.
     /// The reference borrows the sequence store, so it cannot be mutated while references exist.
-    /// On the other hand, handles do not borrow, so they can exist while the store is modified.
-    fn get(&self, handle: &Self::Handle) -> &Self::SequenceRef;
+    fn get<'this: 'result, 'handle: 'result, 'result>(
+        &'this self,
+        handle: &'handle Self::Handle,
+    ) -> &'result Self::SequenceRef;
 }
 
 /// A sequence store that is able to map from references to sequences back to handles.

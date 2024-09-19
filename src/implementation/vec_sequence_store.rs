@@ -103,7 +103,10 @@ impl<AlphabetType: Alphabet + 'static> SequenceStore<AlphabetType>
         })
     }
 
-    fn get(&self, handle: &Self::Handle) -> &Self::SequenceRef {
+    fn get<'this: 'result, 'handle: 'result, 'result>(
+        &'this self,
+        handle: &'handle Self::Handle,
+    ) -> &'result Self::SequenceRef {
         SliceSubGenome::ref_cast(&self.sequence[handle.offset..handle.offset + handle.len])
     }
 }
