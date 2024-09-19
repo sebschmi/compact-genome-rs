@@ -158,7 +158,7 @@ impl<
     }
 }
 
-impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore + Clone> Clone
+impl<const K: usize, AlphabetType: Alphabet, BitArrayType: BitViewSized + BitStore> Clone
     for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
     fn clone(&self) -> Self {
