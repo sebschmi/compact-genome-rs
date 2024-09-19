@@ -49,7 +49,9 @@ impl<
     for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
     fn as_genome_subsequence(&self) -> &BitVectorSubGenome<AlphabetType, BitArrayType> {
-        BitVectorSubGenome::ref_cast(self.array.as_bitslice())
+        BitVectorSubGenome::ref_cast(
+            &self.array.as_bitslice()[..K * alphabet_character_bit_width(AlphabetType::SIZE)],
+        )
     }
 }
 
