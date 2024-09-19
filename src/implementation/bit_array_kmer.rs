@@ -9,7 +9,7 @@ use crate::interface::sequence::{GenomeSequence, OwnedGenomeSequence};
 use bitvec::array::BitArray;
 use bitvec::field::BitField;
 pub use bitvec::store::BitStore;
-use bitvec::view::BitView;
+pub use bitvec::view::BitView;
 pub use bitvec::view::BitViewSized;
 use ref_cast::RefCast;
 use std::marker::PhantomData;
