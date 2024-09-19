@@ -14,11 +14,11 @@ use crate::interface::{
 ///
 /// The sequence store stores nothing, all data is in the handles.
 #[derive(Default, Clone, Eq, PartialEq, Debug)]
-pub struct HandleSequenceStore<AlphabetType, SequenceType, SubsequenceType> {
+pub struct HandleSequenceStore<AlphabetType, SequenceType, SubsequenceType: ?Sized> {
     phantom_data: PhantomData<(AlphabetType, SequenceType, SubsequenceType)>,
 }
 
-impl<AlphabetType, SequenceType, SubsequenceType>
+impl<AlphabetType, SequenceType, SubsequenceType: ?Sized>
     HandleSequenceStore<AlphabetType, SequenceType, SubsequenceType>
 {
     /// Creates a new instance.
@@ -32,7 +32,7 @@ impl<AlphabetType, SequenceType, SubsequenceType>
 impl<
         AlphabetType: Alphabet,
         SequenceType: OwnedGenomeSequence<AlphabetType, SubsequenceType>,
-        SubsequenceType: GenomeSequence<AlphabetType, SubsequenceType>,
+        SubsequenceType: GenomeSequence<AlphabetType, SubsequenceType> + ?Sized,
     > SequenceStore<AlphabetType>
     for HandleSequenceStore<AlphabetType, SequenceType, SubsequenceType>
 {
