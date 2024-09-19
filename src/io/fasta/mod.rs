@@ -284,11 +284,18 @@ impl<'a, AlphabetType: Alphabet, Reader: Read> Iterator
 }
 
 /// Write a fasta file from the given records.
-pub fn write_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
+pub fn write_fasta_file<
+    'records,
+    AlphabetType: Alphabet,
+    SequenceStoreType: SequenceStore<AlphabetType>,
+>(
     path: impl AsRef<Path>,
-    records: impl IntoIterator<Item = FastaRecord<SequenceStoreType::Handle>>,
+    records: impl IntoIterator<Item = &'records FastaRecord<SequenceStoreType::Handle>>,
     store: &SequenceStoreType,
-) -> Result<(), IOError> {
+) -> Result<(), IOError>
+where
+    SequenceStoreType::Handle: 'records,
+{
     let zip_format = ZipFormat::from_path_name(&path);
     let file = File::create(path)?;
 
@@ -299,11 +306,18 @@ pub fn write_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore
 
 /// Write fasta data into the given sequence store.
 /// The writer should be buffered for performance.
-pub fn write_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
+pub fn write_fasta<
+    'records,
+    AlphabetType: Alphabet,
+    SequenceStoreType: SequenceStore<AlphabetType>,
+>(
     mut writer: impl Write,
-    records: impl IntoIterator<Item = FastaRecord<SequenceStoreType::Handle>>,
+    records: impl IntoIterator<Item = &'records FastaRecord<SequenceStoreType::Handle>>,
     store: &SequenceStoreType,
-) -> Result<(), IOError> {
+) -> Result<(), IOError>
+where
+    SequenceStoreType::Handle: 'records,
+{
     for record in records {
         writeln!(
             writer,
@@ -342,7 +356,7 @@ mod tests {
         let mut store = DefaultSequenceStore::<DnaAlphabet>::new();
         let records = read_fasta(input_file, &mut store, false, false).unwrap();
         let mut output_file = Vec::new();
-        write_fasta(&mut output_file, records, &store).unwrap();
+        write_fasta(&mut output_file, &records, &store).unwrap();
 
         assert_eq!(
             expected_output_file,
@@ -365,7 +379,7 @@ mod tests {
         let mut store = DefaultSequenceStore::<DnaAlphabet>::new();
         let records = read_fasta(input_file, &mut store, true, true).unwrap();
         let mut output_file = Vec::new();
-        write_fasta(&mut output_file, records, &store).unwrap();
+        write_fasta(&mut output_file, &records, &store).unwrap();
 
         assert_eq!(
             expected_output_file,
