@@ -3,6 +3,7 @@ pub mod array_kmer;
 pub mod bit_array_kmer;
 pub mod bit_vec_sequence;
 pub mod bit_vec_sequence_store;
+pub mod handle_sequence_store;
 pub mod vec_sequence;
 pub mod vec_sequence_store;
 
