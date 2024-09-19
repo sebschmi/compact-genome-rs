@@ -39,6 +39,22 @@ impl<
     > OwnedKmer<K, AlphabetType, BitVectorSubGenome<AlphabetType, BitArrayType>>
     for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
+    fn successor(&self, successor: <AlphabetType as Alphabet>::CharacterType) -> Self {
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+
+        let mut array = self.array.clone();
+        array.shift_left(bit_width);
+
+        let offset = (K - 1) * bit_width;
+        let limit = K * bit_width;
+
+        array[offset..limit].store(successor.index());
+
+        Self {
+            phantom_data: Default::default(),
+            array,
+        }
+    }
 }
 
 impl<
@@ -244,5 +260,77 @@ mod serde {
         {
             BitArrayType::deserialize_in_place(deserializer, &mut place.array.data)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use traitsequence::interface::Sequence;
+
+    use crate::{
+        implementation::alphabets::dna_alphabet::{DnaAlphabet, DnaCharacter},
+        interface::{k_mer::OwnedKmer, sequence::OwnedGenomeSequence},
+    };
+
+    use super::BitArrayKmer;
+
+    #[test]
+    fn successor() {
+        let kmer =
+            BitArrayKmer::<4, DnaAlphabet>::from_slice_u8(&[b'A', b'C', b'G', b'T']).unwrap();
+        let successor_a = kmer.successor(b'A'.try_into().unwrap());
+        let successor_c = kmer.successor(b'C'.try_into().unwrap());
+        let successor_g = kmer.successor(b'G'.try_into().unwrap());
+        let successor_t = kmer.successor(b'T'.try_into().unwrap());
+
+        assert_eq!(
+            kmer.iter().cloned().collect::<Vec<_>>(),
+            vec![
+                DnaCharacter::try_from(b'A').unwrap(),
+                DnaCharacter::try_from(b'C').unwrap(),
+                DnaCharacter::try_from(b'G').unwrap(),
+                DnaCharacter::try_from(b'T').unwrap()
+            ],
+        );
+
+        assert_eq!(
+            successor_a.iter().cloned().collect::<Vec<_>>(),
+            vec![
+                DnaCharacter::try_from(b'C').unwrap(),
+                DnaCharacter::try_from(b'G').unwrap(),
+                DnaCharacter::try_from(b'T').unwrap(),
+                DnaCharacter::try_from(b'A').unwrap()
+            ],
+        );
+
+        assert_eq!(
+            successor_c.iter().cloned().collect::<Vec<_>>(),
+            vec![
+                DnaCharacter::try_from(b'C').unwrap(),
+                DnaCharacter::try_from(b'G').unwrap(),
+                DnaCharacter::try_from(b'T').unwrap(),
+                DnaCharacter::try_from(b'C').unwrap()
+            ],
+        );
+
+        assert_eq!(
+            successor_g.iter().cloned().collect::<Vec<_>>(),
+            vec![
+                DnaCharacter::try_from(b'C').unwrap(),
+                DnaCharacter::try_from(b'G').unwrap(),
+                DnaCharacter::try_from(b'T').unwrap(),
+                DnaCharacter::try_from(b'G').unwrap()
+            ],
+        );
+
+        assert_eq!(
+            successor_t.iter().cloned().collect::<Vec<_>>(),
+            vec![
+                DnaCharacter::try_from(b'C').unwrap(),
+                DnaCharacter::try_from(b'G').unwrap(),
+                DnaCharacter::try_from(b'T').unwrap(),
+                DnaCharacter::try_from(b'T').unwrap()
+            ],
+        );
     }
 }

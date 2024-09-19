@@ -24,6 +24,10 @@ pub trait OwnedKmer<
     GenomeSubsequence: GenomeSequence<AlphabetType, GenomeSubsequence> + ?Sized,
 >: OwnedGenomeSequence<AlphabetType, GenomeSubsequence>
 {
+    /// Get the successor of this k-mer with the specified character.
+    ///
+    /// This works by shifting the k-mer to the left and adding the character at the end.
+    fn successor(&self, successor: AlphabetType::CharacterType) -> Self;
 }
 
 /// A k-mer whose characters can be mutated.
