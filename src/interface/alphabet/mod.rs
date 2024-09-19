@@ -65,3 +65,38 @@ pub enum AlphabetError {
         index: usize,
     },
 }
+
+/// Random distributions over alphabets.
+#[cfg(feature = "rand")]
+pub mod rand {
+    use std::marker::PhantomData;
+
+    use rand::{distributions::Uniform, prelude::Distribution};
+
+    use super::{Alphabet, AlphabetCharacter};
+
+    /// A uniform distribution over a generic alphabet.
+    ///
+    /// Sampling this distribution yields a random alphabet character, where each character is equally likely.
+    pub struct UniformAlphabetDistribution<AlphabetType: Alphabet> {
+        phantom_data: PhantomData<AlphabetType>,
+    }
+
+    impl<AlphabetType: Alphabet> Distribution<AlphabetType::CharacterType>
+        for UniformAlphabetDistribution<AlphabetType>
+    {
+        fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> AlphabetType::CharacterType {
+            let index_distribution = Uniform::new(0, AlphabetType::SIZE);
+            let index = index_distribution.sample(rng);
+            AlphabetType::CharacterType::from_index(index).unwrap()
+        }
+    }
+
+    impl<AlphabetType: Alphabet> Default for UniformAlphabetDistribution<AlphabetType> {
+        fn default() -> Self {
+            Self {
+                phantom_data: Default::default(),
+            }
+        }
+    }
+}
