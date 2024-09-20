@@ -223,4 +223,24 @@ pub trait EditableGenomeSequence<
 
     /// Insert the given character at the end of the genome sequence.
     fn push(&mut self, character: AlphabetType::CharacterType);
+
+    /// Delete the characters in the specified sequence index range.
+    fn delete(&mut self, range: Range<usize>)
+    where
+        Self: GenomeSequenceMut<AlphabetType, GenomeSubsequence>,
+        GenomeSubsequence: GenomeSequenceMut<AlphabetType, GenomeSubsequence>,
+    {
+        assert!(range.end <= self.len());
+        if range.start >= range.end {
+            assert_eq!(range.start, range.end);
+        } else {
+            for index in range.start..self.len() - range.len() {
+                self[index] = self[index + range.len()].clone();
+            }
+            self.resize(
+                self.len() - range.len(),
+                AlphabetType::iter().next().unwrap(),
+            );
+        }
+    }
 }
