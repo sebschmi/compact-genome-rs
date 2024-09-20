@@ -276,8 +276,7 @@ mod tests {
 
     #[test]
     fn successor() {
-        let kmer =
-            BitArrayKmer::<4, DnaAlphabet>::from_slice_u8(&[b'A', b'C', b'G', b'T']).unwrap();
+        let kmer = BitArrayKmer::<4, DnaAlphabet>::from_slice_u8(b"ACGT").unwrap();
         let successor_a = kmer.successor(b'A'.try_into().unwrap());
         let successor_c = kmer.successor(b'C'.try_into().unwrap());
         let successor_g = kmer.successor(b'G'.try_into().unwrap());
