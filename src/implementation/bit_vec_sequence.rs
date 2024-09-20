@@ -374,6 +374,13 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
     EditableGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType, BitStoreType>>
     for BitVectorGenome<AlphabetType, BitStoreType>
 {
+    fn set(&mut self, index: usize, character: <AlphabetType as Alphabet>::CharacterType) {
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+        let value = character.index();
+        self.bits[index * bit_width..(index + 1) * bit_width]
+            .clone_from_bitslice(&value.view_bits::<Lsb0>()[0..bit_width]);
+    }
+
     fn reserve(&mut self, additional: usize) {
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
         self.bits.reserve(additional * bit_width)

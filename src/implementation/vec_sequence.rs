@@ -47,6 +47,10 @@ impl<AlphabetType: Alphabet> OwnedGenomeSequence<AlphabetType, SliceSubGenome<Al
 impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
+    fn set(&mut self, index: usize, character: <AlphabetType as Alphabet>::CharacterType) {
+        self.vector[index] = character;
+    }
+
     fn reserve(&mut self, additional: usize) {
         self.vector.reserve(additional)
     }
