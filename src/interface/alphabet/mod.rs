@@ -46,6 +46,11 @@ pub trait Alphabet: Sized {
     fn character_to_ascii(character: Self::CharacterType) -> u8 {
         character.into()
     }
+
+    /// Returns an iterator over the characters in this alphabet.
+    fn iter() -> impl Iterator<Item = Self::CharacterType> {
+        (0..Self::SIZE).map(|index| Self::CharacterType::from_index(index).unwrap())
+    }
 }
 
 /// An error when dealing with alphabets.
