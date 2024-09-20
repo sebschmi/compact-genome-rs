@@ -21,7 +21,7 @@ serde = ["dep:serde"]
 rand = ["dep:rand"]
 
 [dependencies]
-traitsequence = "2.0.0"
+traitsequence = "3.0.0"
 itertools = "0.13.0"
 bitvec = "1.0.1"
 ref-cast = "1.0.23"

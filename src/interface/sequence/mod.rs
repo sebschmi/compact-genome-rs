@@ -179,9 +179,6 @@ pub trait EditableGenomeSequence<
     EditableSequence<AlphabetType::CharacterType, GenomeSubsequence>
     + GenomeSequence<AlphabetType, GenomeSubsequence>
 {
-    /// Replace the character at the given index with the given character.
-    fn set(&mut self, index: usize, character: AlphabetType::CharacterType);
-
     /// Converts this genome sequence into an iterator over ASCII characters.
     fn into_iter_u8(self) -> IntoIterU8<Self, AlphabetType> {
         self.into_iter().map(AlphabetType::character_to_ascii)
@@ -215,54 +212,5 @@ pub trait EditableGenomeSequence<
     /// Extends this genome from a sequence of ASCII characters.
     fn extend_from_slice_u8(&mut self, slice: &[u8]) -> Result<(), AlphabetError> {
         self.extend_from_iter_u8(slice.iter().copied())
-    }
-
-    /// Reserve memory for at least `additional` items.
-    fn reserve(&mut self, additional: usize);
-
-    /// Resize to contain the given number of items.
-    /// Empty spaces are filled with the given default item.
-    fn resize(&mut self, len: usize, default: AlphabetType::CharacterType);
-
-    /// Insert the given character at the end of the genome sequence.
-    fn push(&mut self, character: AlphabetType::CharacterType);
-
-    /// Delete the characters in the specified sequence index range.
-    fn delete(&mut self, range: Range<usize>) {
-        assert!(range.end <= self.len());
-        if range.start >= range.end {
-            assert_eq!(range.start, range.end);
-        } else {
-            for index in range.start..self.len() - range.len() {
-                self.set(index, self[index + range.len()].clone());
-            }
-            self.resize(
-                self.len() - range.len(),
-                AlphabetType::iter().next().unwrap(),
-            );
-        }
-    }
-
-    /// Insert a repeat at `target` that consists of the characters in `source_range`.
-    fn insert_repeat(&mut self, source_range: Range<usize>, target: usize) {
-        assert!(source_range.end <= self.len());
-        if source_range.start >= source_range.end {
-            assert_eq!(source_range.start, source_range.end);
-        } else {
-            self.resize(
-                self.len() + source_range.len(),
-                AlphabetType::CharacterType::from_index(0).unwrap(),
-            );
-            for index in (target + source_range.len()..self.len() + source_range.len()).rev() {
-                self.set(index, self[index - source_range.len()].clone());
-            }
-            for index in 0..source_range.len() {
-                if index + source_range.start < target {
-                    self.set(index + target, self[index + source_range.start].clone());
-                } else {
-                    self.set(index + target, self[index + source_range.end].clone());
-                }
-            }
-        }
     }
 }

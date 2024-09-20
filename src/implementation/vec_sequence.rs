@@ -47,21 +47,6 @@ impl<AlphabetType: Alphabet> OwnedGenomeSequence<AlphabetType, SliceSubGenome<Al
 impl<AlphabetType: Alphabet> EditableGenomeSequence<AlphabetType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
-    fn set(&mut self, index: usize, character: <AlphabetType as Alphabet>::CharacterType) {
-        self.vector[index] = character;
-    }
-
-    fn reserve(&mut self, additional: usize) {
-        self.vector.reserve(additional)
-    }
-
-    fn resize(&mut self, len: usize, default: AlphabetType::CharacterType) {
-        self.vector.resize(len, default)
-    }
-
-    fn push(&mut self, character: AlphabetType::CharacterType) {
-        self.vector.push(character)
-    }
 }
 
 impl<AlphabetType: Alphabet> GenomeSequence<AlphabetType, SliceSubGenome<AlphabetType>>
@@ -110,6 +95,41 @@ impl<AlphabetType: Alphabet>
         Self {
             vector: self.vector.split_off(at),
         }
+    }
+
+    fn set(&mut self, index: usize, item: AlphabetType::CharacterType) {
+        self.vector.set(index, item)
+    }
+
+    fn reserve(&mut self, additional: usize) {
+        self.vector.reserve(additional)
+    }
+
+    fn resize(&mut self, new_len: usize, value: AlphabetType::CharacterType)
+    where
+        AlphabetType::CharacterType: Clone,
+    {
+        self.vector.resize(new_len, value)
+    }
+
+    fn resize_with(
+        &mut self,
+        new_len: usize,
+        generator: impl FnMut() -> AlphabetType::CharacterType,
+    ) {
+        self.vector.resize_with(new_len, generator);
+    }
+
+    fn push(&mut self, item: AlphabetType::CharacterType) {
+        self.vector.push(item)
+    }
+
+    fn splice(
+        &mut self,
+        range: Range<usize>,
+        replace_with: impl IntoIterator<Item = AlphabetType::CharacterType>,
+    ) {
+        self.vector.splice(range, replace_with);
     }
 }
 

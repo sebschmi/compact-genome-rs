@@ -93,11 +93,78 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
     EditableSequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitStoreType>>
     for BitVectorGenome<AlphabetType, BitStoreType>
 {
+    fn set(&mut self, index: usize, character: <AlphabetType as Alphabet>::CharacterType) {
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+        let value = character.index();
+        self.bits[index * bit_width..(index + 1) * bit_width]
+            .clone_from_bitslice(&value.view_bits::<Lsb0>()[0..bit_width]);
+    }
+
     fn split_off(&mut self, at: usize) -> Self {
         Self {
             phantom_data: self.phantom_data,
             bits: self.bits.split_off(at),
         }
+    }
+
+    fn reserve(&mut self, additional: usize) {
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+        self.bits.reserve(additional * bit_width)
+    }
+
+    fn resize(&mut self, new_len: usize, default: AlphabetType::CharacterType) {
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+        if self.len() <= new_len {
+            self.bits.resize(new_len * bit_width, false);
+        } else {
+            let difference = new_len - self.len();
+            let value = default.index();
+            for _ in 0..difference {
+                self.bits
+                    .extend_from_bitslice(&value.view_bits::<Lsb0>()[0..bit_width]);
+            }
+        }
+    }
+
+    fn resize_with(
+        &mut self,
+        new_len: usize,
+        mut generator: impl FnMut() -> AlphabetType::CharacterType,
+    ) {
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+        if self.len() <= new_len {
+            self.bits.resize(new_len * bit_width, false);
+        } else {
+            let difference = new_len - self.len();
+            let value = generator().index();
+            for _ in 0..difference {
+                self.bits
+                    .extend_from_bitslice(&value.view_bits::<Lsb0>()[0..bit_width]);
+            }
+        }
+    }
+
+    fn push(&mut self, character: AlphabetType::CharacterType) {
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+        let value = character.index();
+        self.bits
+            .extend_from_bitslice(&value.view_bits::<Lsb0>()[0..bit_width])
+    }
+
+    fn splice(
+        &mut self,
+        range: Range<usize>,
+        replace_with: impl IntoIterator<Item = AlphabetType::CharacterType>,
+    ) {
+        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+        self.bits.splice(
+            range.start * bit_width..range.end * bit_width,
+            replace_with.into_iter().flat_map(|character| {
+                let index = character.index();
+                let array = BitArray::<_, Lsb0>::from(index);
+                array.into_iter().take(bit_width)
+            }),
+        );
     }
 }
 
@@ -374,38 +441,6 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
     EditableGenomeSequence<AlphabetType, BitVectorSubGenome<AlphabetType, BitStoreType>>
     for BitVectorGenome<AlphabetType, BitStoreType>
 {
-    fn set(&mut self, index: usize, character: <AlphabetType as Alphabet>::CharacterType) {
-        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
-        let value = character.index();
-        self.bits[index * bit_width..(index + 1) * bit_width]
-            .clone_from_bitslice(&value.view_bits::<Lsb0>()[0..bit_width]);
-    }
-
-    fn reserve(&mut self, additional: usize) {
-        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
-        self.bits.reserve(additional * bit_width)
-    }
-
-    fn resize(&mut self, len: usize, default: AlphabetType::CharacterType) {
-        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
-        if self.len() <= len {
-            self.bits.resize(len * bit_width, false);
-        } else {
-            let difference = len - self.len();
-            let value = default.index();
-            for _ in 0..difference {
-                self.bits
-                    .extend_from_bitslice(&value.view_bits::<Lsb0>()[0..bit_width]);
-            }
-        }
-    }
-
-    fn push(&mut self, character: AlphabetType::CharacterType) {
-        let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
-        let value = character.index();
-        self.bits
-            .extend_from_bitslice(&value.view_bits::<Lsb0>()[0..bit_width])
-    }
 }
 
 impl<AlphabetType: Alphabet, BitStoreType: BitStore>
