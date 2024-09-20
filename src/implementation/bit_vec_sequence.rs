@@ -5,6 +5,7 @@ use crate::interface::sequence::{EditableGenomeSequence, GenomeSequence, OwnedGe
 use bitvec::prelude::*;
 use ref_cast::RefCast;
 use std::borrow::Borrow;
+use std::hash::Hash;
 use std::iter::FromIterator;
 use std::marker::PhantomData;
 use std::mem;
@@ -12,7 +13,7 @@ use std::ops::{Index, Range, RangeFrom, RangeFull, RangeInclusive, RangeTo, Rang
 use traitsequence::interface::{EditableSequence, OwnedSequence, Sequence};
 
 /// A genome sequence stored as vector of minimum-bit characters.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug)]
 pub struct BitVectorGenome<AlphabetType: Alphabet, BitStoreType = usize>
 where
     BitStoreType: BitStore,
@@ -420,6 +421,38 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore> Default
             phantom_data: Default::default(),
             bits: Default::default(),
         }
+    }
+}
+
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Clone
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    fn clone(&self) -> Self {
+        Self {
+            phantom_data: PhantomData,
+            bits: self.bits.clone(),
+        }
+    }
+}
+
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Eq
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+}
+
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> PartialEq
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.bits.eq(&other.bits)
+    }
+}
+
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> Hash
+    for BitVectorGenome<AlphabetType, BitStoreType>
+{
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.bits.hash(state)
     }
 }
 
