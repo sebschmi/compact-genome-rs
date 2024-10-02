@@ -114,7 +114,7 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
 
     fn resize(&mut self, new_len: usize, default: AlphabetType::CharacterType) {
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
-        if self.len() <= new_len {
+        if self.len() >= new_len {
             self.bits.resize(new_len * bit_width, false);
         } else {
             let difference = new_len - self.len();
@@ -132,7 +132,7 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
         mut generator: impl FnMut() -> AlphabetType::CharacterType,
     ) {
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
-        if self.len() <= new_len {
+        if self.len() >= new_len {
             self.bits.resize(new_len * bit_width, false);
         } else {
             let difference = new_len - self.len();
