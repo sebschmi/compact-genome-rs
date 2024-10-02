@@ -156,7 +156,17 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
         range: Range<usize>,
         replace_with: impl IntoIterator<Item = AlphabetType::CharacterType>,
     ) {
+        assert!(range.end <= self.len());
+
+        let suffix: Self = self.iter().skip(range.end).cloned().collect();
+        self.resize_with(range.start, || unreachable!());
+        self.extend(replace_with);
+        self.extend(suffix);
+
+        // Bitvec's splice implementation is broken: https://github.com/ferrilab/bitvec/issues
+        /*
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
+
         self.bits.splice(
             range.start * bit_width..range.end * bit_width,
             replace_with.into_iter().flat_map(|character| {
@@ -164,7 +174,7 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
                 let array = BitArray::<_, Lsb0>::from(index);
                 array.into_iter().take(bit_width)
             }),
-        );
+        ); */
     }
 }
 
@@ -508,6 +518,7 @@ mod tests {
     use crate::implementation::bit_vec_sequence::BitVectorGenome;
     use crate::interface::alphabet::Alphabet;
     use crate::interface::sequence::{EditableGenomeSequence, GenomeSequence, OwnedGenomeSequence};
+    use traitsequence::interface::{EditableSequence, Sequence};
 
     #[test]
     fn test_reverse_complement() {
@@ -606,5 +617,17 @@ mod tests {
         assert_eq!(genome[3], DnaAlphabet::ascii_to_character(b'C').unwrap());
         assert_eq!(genome[4], DnaAlphabet::ascii_to_character(b'G').unwrap());
         assert_eq!(genome[5], DnaAlphabet::ascii_to_character(b'T').unwrap());
+    }
+
+    #[test]
+    fn test_splice() {
+        let mut genome = BitVectorGenome::<DnaAlphabet>::from_slice_u8(b"ATCTGT").unwrap();
+        let insertion: BitVectorGenome<DnaAlphabet> =
+            genome.iter().skip(1).take(3).cloned().collect();
+        genome.splice(3..3, insertion);
+        assert_eq!(
+            genome,
+            BitVectorGenome::<DnaAlphabet>::from_slice_u8(b"ATCTCTTGT").unwrap()
+        );
     }
 }
