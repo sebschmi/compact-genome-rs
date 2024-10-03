@@ -40,6 +40,10 @@ impl<
     for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
     fn successor(&self, successor: <AlphabetType as Alphabet>::CharacterType) -> Self {
+        if K == 0 {
+            return self.clone();
+        }
+
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
 
         let mut array = self.array.clone();
