@@ -230,8 +230,8 @@ struct FastaSequenceIterator<'a, AlphabetType, Reader> {
     phantom_data: PhantomData<AlphabetType>,
 }
 
-impl<'a, AlphabetType: Alphabet, Reader: Read> Iterator
-    for FastaSequenceIterator<'a, AlphabetType, Reader>
+impl<AlphabetType: Alphabet, Reader: Read> Iterator
+    for FastaSequenceIterator<'_, AlphabetType, Reader>
 {
     type Item = AlphabetType::CharacterType;
 

@@ -399,8 +399,8 @@ impl<'iter, AlphabetType: Alphabet, BitStoreType: BitStore> Iterator
     }
 }
 
-impl<'a, AlphabetType: Alphabet, BitStoreType: BitStore> DoubleEndedIterator
-    for BitVectorSubGenomeIterator<'a, AlphabetType, BitStoreType>
+impl<AlphabetType: Alphabet, BitStoreType: BitStore> DoubleEndedIterator
+    for BitVectorSubGenomeIterator<'_, AlphabetType, BitStoreType>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.slice.len() > 0 {
