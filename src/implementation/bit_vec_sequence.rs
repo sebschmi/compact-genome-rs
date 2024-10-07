@@ -163,7 +163,7 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
         self.extend(replace_with);
         self.extend(suffix);
 
-        // Bitvec's splice implementation is broken: https://github.com/ferrilab/bitvec/issues
+        // Bitvec's splice implementation is broken: https://github.com/ferrilab/bitvec/issues/280
         /*
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
 
