@@ -34,11 +34,14 @@ pub struct FastaRecord<Handle> {
 ///
 /// If `skip_invalid_characters` is set, then invalid characters are skipped.
 /// If `capitalise_characters` is set, then lower-case characters are parsed as upper-case.
+/// If an ASCII index in `skip_characters` contains true, then that character will always be skipped (after capitalisation).
+/// If the index does not exist (i.e. `skip_characters` is too short), the character will not be skipped.
 pub fn read_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
     path: impl AsRef<Path>,
     store: &mut SequenceStoreType,
     skip_invalid_characters: bool,
     capitalise_characters: bool,
+    skip_characters: &[bool],
 ) -> Result<Vec<FastaRecord<SequenceStoreType::Handle>>, IOError> {
     let zip_format_hint = ZipFormat::from_path_name(&path);
     let file = File::open(path)?;
@@ -49,17 +52,22 @@ pub fn read_fasta_file<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<
             store,
             skip_invalid_characters,
             capitalise_characters,
+            skip_characters,
         )
     })
 }
 
 /// Read fasta data into the given sequence store.
+///
 /// The reader should be buffered for performance.
+/// If an ASCII index in `skip_characters` contains true, then that character will always be skipped (after capitalisation).
+/// If the index does not exist (i.e. `skip_characters` is too short), the character will not be skipped.
 pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<AlphabetType>>(
     reader: impl Read,
     store: &mut SequenceStoreType,
     skip_invalid_characters: bool,
     capitalise_characters: bool,
+    skip_characters: &[bool],
 ) -> Result<Vec<FastaRecord<SequenceStoreType::Handle>>, IOError> {
     enum State {
         Init,
@@ -183,6 +191,7 @@ pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alpha
                     newline: true,
                     skip_invalid_characters,
                     capitalise_characters,
+                    skip_characters,
                     phantom_data: PhantomData::<AlphabetType>,
                 };
 
@@ -217,8 +226,8 @@ pub fn read_fasta<AlphabetType: Alphabet, SequenceStoreType: SequenceStore<Alpha
     Ok(records)
 }
 
-struct FastaSequenceIterator<'a, AlphabetType, Reader> {
-    reader: &'a mut Reader,
+struct FastaSequenceIterator<'reader, 'skip_characters, AlphabetType, Reader> {
+    reader: &'reader mut Reader,
     buffer: [u8; 1],
     /// Holds Some() on termination.
     /// Is Err() if an error occurred, and Ok() otherwise.
@@ -227,11 +236,12 @@ struct FastaSequenceIterator<'a, AlphabetType, Reader> {
     newline: bool,
     skip_invalid_characters: bool,
     capitalise_characters: bool,
+    skip_characters: &'skip_characters [bool],
     phantom_data: PhantomData<AlphabetType>,
 }
 
 impl<AlphabetType: Alphabet, Reader: Read> Iterator
-    for FastaSequenceIterator<'_, AlphabetType, Reader>
+    for FastaSequenceIterator<'_, '_, AlphabetType, Reader>
 {
     type Item = AlphabetType::CharacterType;
 
@@ -265,14 +275,21 @@ impl<AlphabetType: Alphabet, Reader: Read> Iterator
                     self.buffer[0]
                 };
 
-                match AlphabetType::CharacterType::try_from(ascii) {
-                    Ok(character) => return Some(character),
-                    Err(_) => {
-                        if !self.skip_invalid_characters {
-                            self.result = Some(Err(IOError::AlphabetError(
-                                AlphabetError::AsciiNotPartOfAlphabet { ascii },
-                            )));
-                            return None;
+                if !self
+                    .skip_characters
+                    .get(usize::from(ascii))
+                    .copied()
+                    .unwrap_or(false)
+                {
+                    match AlphabetType::CharacterType::try_from(ascii) {
+                        Ok(character) => return Some(character),
+                        Err(_) => {
+                            if !self.skip_invalid_characters {
+                                self.result = Some(Err(IOError::AlphabetError(
+                                    AlphabetError::AsciiNotPartOfAlphabet { ascii },
+                                )));
+                                return None;
+                            }
                         }
                     }
                 }
@@ -354,7 +371,7 @@ mod tests {
             b">alt1 comment1\nGGTTGGCCT\n>f2\nACCTG\n>f3\nAA\n>seq c2\nGT\n".as_slice();
 
         let mut store = DefaultSequenceStore::<DnaAlphabet>::new();
-        let records = read_fasta(input_file, &mut store, false, false).unwrap();
+        let records = read_fasta(input_file, &mut store, false, false, &[]).unwrap();
         let mut output_file = Vec::new();
         write_fasta(&mut output_file, &records, &store).unwrap();
 
@@ -377,7 +394,7 @@ mod tests {
             b">alt1 comment1\nGGTTGGCCT\n>f2\nACCTG\n>f3\nAA\n>seq c2\nGT\n".as_slice();
 
         let mut store = DefaultSequenceStore::<DnaAlphabet>::new();
-        let records = read_fasta(input_file, &mut store, true, true).unwrap();
+        let records = read_fasta(input_file, &mut store, true, true, &[]).unwrap();
         let mut output_file = Vec::new();
         write_fasta(&mut output_file, &records, &store).unwrap();
 
