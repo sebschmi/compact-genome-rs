@@ -82,7 +82,11 @@ impl<
     > Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitArrayType>>
     for BitArrayKmer<K, AlphabetType, BitArrayType>
 {
-    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType, BitArrayType> where Self: 'a, AlphabetType::CharacterType: 'a;
+    type Iterator<'a>
+        = BitVectorSubGenomeIterator<'a, AlphabetType, BitArrayType>
+    where
+        Self: 'a,
+        AlphabetType::CharacterType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         self.as_genome_subsequence().iter()

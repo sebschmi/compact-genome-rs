@@ -1,42 +1,42 @@
-//! The DNA alphabet including N, consisting of characters A, C, G, T and N.
+//! The RNA alphabet including N, consisting of characters A, C, G, U, and N.
 
 use crate::interface::alphabet::{Alphabet, AlphabetCharacter, AlphabetError};
 use lazy_static::lazy_static;
 use std::convert::TryFrom;
 use std::fmt::{Display, Formatter};
 
-/// A character of a DNA alphabet or N: A, C, G, T or N.
+/// A character of a RNA alphabet or N: A, C, G, U or N.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DnaCharacterOrN {
+pub struct RnaCharacterOrN {
     character: u8,
 }
 
-/// The DNA alphabet, consisting of characters A, C, G and T, or N.
+/// The RNA alphabet, consisting of characters A, C, G and U, or N.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DnaAlphabetOrN;
+pub struct RnaAlphabetOrN;
 
-static DNA_CHARACTER_OR_N_TO_ASCII_TABLE: [u8; DnaAlphabetOrN::SIZE] =
-    [b'A', b'C', b'G', b'N', b'T'];
+static RNA_CHARACTER_OR_N_TO_ASCII_TABLE: [u8; RnaAlphabetOrN::SIZE] =
+    [b'A', b'C', b'G', b'N', b'U'];
 
-impl From<DnaCharacterOrN> for u8 {
-    fn from(character: DnaCharacterOrN) -> u8 {
+impl From<RnaCharacterOrN> for u8 {
+    fn from(character: RnaCharacterOrN) -> u8 {
         // Safety: character is private and cannot be constructed out of range.
-        unsafe { *DNA_CHARACTER_OR_N_TO_ASCII_TABLE.get_unchecked(character.character as usize) }
+        unsafe { *RNA_CHARACTER_OR_N_TO_ASCII_TABLE.get_unchecked(character.character as usize) }
     }
 }
 
-impl From<DnaCharacterOrN> for char {
-    fn from(character: DnaCharacterOrN) -> Self {
+impl From<RnaCharacterOrN> for char {
+    fn from(character: RnaCharacterOrN) -> Self {
         u8::from(character).into()
     }
 }
 
-static ASCII_TO_DNA_CHARACTER_OR_N_TABLE: [u8; 256] = [
+static ASCII_TO_RNA_CHARACTER_OR_N_TABLE: [u8; 256] = [
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-    5, 0, 5, 1, 5, 5, 5, 2, 5, 5, 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    5, 0, 5, 1, 5, 5, 5, 2, 5, 5, 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
@@ -44,12 +44,12 @@ static ASCII_TO_DNA_CHARACTER_OR_N_TABLE: [u8; 256] = [
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 ];
 
-impl TryFrom<u8> for DnaCharacterOrN {
+impl TryFrom<u8> for RnaCharacterOrN {
     type Error = ();
 
     fn try_from(ascii: u8) -> Result<Self, Self::Error> {
         // Safety: array covers the whole range of u8.
-        let character = unsafe { *ASCII_TO_DNA_CHARACTER_OR_N_TABLE.get_unchecked(ascii as usize) };
+        let character = unsafe { *ASCII_TO_RNA_CHARACTER_OR_N_TABLE.get_unchecked(ascii as usize) };
         if character >= Self::ALPHABET_SIZE.try_into().unwrap() {
             Err(())
         } else {
@@ -58,7 +58,7 @@ impl TryFrom<u8> for DnaCharacterOrN {
     }
 }
 
-impl TryFrom<char> for DnaCharacterOrN {
+impl TryFrom<char> for RnaCharacterOrN {
     type Error = ();
 
     fn try_from(character: char) -> Result<Self, Self::Error> {
@@ -70,18 +70,18 @@ impl TryFrom<char> for DnaCharacterOrN {
     }
 }
 
-static DNA_CHARACTER_OR_N_COMPLEMENT_TABLE: [u8; DnaCharacterOrN::ALPHABET_SIZE] = [4, 2, 1, 3, 0];
+static RNA_CHARACTER_OR_N_COMPLEMENT_TABLE: [u8; RnaCharacterOrN::ALPHABET_SIZE] = [4, 2, 1, 3, 0];
 
 lazy_static! {
-    static ref DNA_CHARACTER_OR_N_TABLE: Vec<DnaCharacterOrN> = {
-        (0..DnaCharacterOrN::ALPHABET_SIZE)
-            .map(DnaCharacterOrN::from_index)
+    static ref RNA_CHARACTER_OR_N_TABLE: Vec<RnaCharacterOrN> = {
+        (0..RnaCharacterOrN::ALPHABET_SIZE)
+            .map(RnaCharacterOrN::from_index)
             .map(Result::unwrap)
             .collect()
     };
 }
 
-impl AlphabetCharacter for DnaCharacterOrN {
+impl AlphabetCharacter for RnaCharacterOrN {
     const ALPHABET_SIZE: usize = 5;
 
     fn index(&self) -> usize {
@@ -100,7 +100,7 @@ impl AlphabetCharacter for DnaCharacterOrN {
 
     fn from_index_ref(index: usize) -> Result<&'static Self, AlphabetError> {
         if index < Self::ALPHABET_SIZE {
-            Ok(&DNA_CHARACTER_OR_N_TABLE[index])
+            Ok(&RNA_CHARACTER_OR_N_TABLE[index])
         } else {
             Err(AlphabetError::IndexNotPartOfAlphabet { index })
         }
@@ -110,17 +110,17 @@ impl AlphabetCharacter for DnaCharacterOrN {
         Self {
             // Safety: character is private and cannot be constructed out of range.
             character: unsafe {
-                *DNA_CHARACTER_OR_N_COMPLEMENT_TABLE.get_unchecked(self.character as usize)
+                *RNA_CHARACTER_OR_N_COMPLEMENT_TABLE.get_unchecked(self.character as usize)
             },
         }
     }
 }
 
-impl Alphabet for DnaAlphabetOrN {
-    type CharacterType = DnaCharacterOrN;
+impl Alphabet for RnaAlphabetOrN {
+    type CharacterType = RnaCharacterOrN;
 }
 
-impl Display for DnaCharacterOrN {
+impl Display for RnaCharacterOrN {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -130,7 +130,7 @@ impl Display for DnaCharacterOrN {
                 1 => 'C',
                 2 => 'G',
                 3 => 'N',
-                4 => 'T',
+                4 => 'U',
                 _ => unreachable!("Character is private and cannot be constructed out of range."),
             }
         )
@@ -139,32 +139,32 @@ impl Display for DnaCharacterOrN {
 
 #[cfg(test)]
 mod tests {
-    use crate::implementation::alphabets::dna_alphabet_or_n::DnaCharacterOrN;
+    use crate::implementation::alphabets::rna_alphabet_or_n::RnaCharacterOrN;
     use std::convert::TryFrom;
 
     #[test]
-    fn test_dna_alphabet_conversion() {
+    fn test_rna_alphabet_conversion() {
         for ascii in 0u8..=255u8 {
-            if ascii == b'A' || ascii == b'C' || ascii == b'G' || ascii == b'N' || ascii == b'T' {
+            if ascii == b'A' || ascii == b'C' || ascii == b'G' || ascii == b'N' || ascii == b'U' {
                 assert_eq!(
-                    u8::from(DnaCharacterOrN::try_from(ascii).unwrap_or_else(|_| panic!(
+                    u8::from(RnaCharacterOrN::try_from(ascii).unwrap_or_else(|_| panic!(
                         "character {} was expected to be valid, but is not",
                         ascii
                     ))),
                     ascii
                 );
             } else {
-                assert!(DnaCharacterOrN::try_from(ascii).is_err());
+                assert!(RnaCharacterOrN::try_from(ascii).is_err());
             }
         }
     }
 
     #[test]
     fn test_display() {
-        for character in ['A', 'C', 'G', 'N', 'T'] {
-            let dna_character =
-                DnaCharacterOrN::try_from(u8::try_from(character).unwrap()).unwrap();
-            assert_eq!(format!("{character}"), format!("{dna_character}"));
+        for character in ['A', 'C', 'G', 'N', 'U'] {
+            let rna_character =
+                RnaCharacterOrN::try_from(u8::try_from(character).unwrap()).unwrap();
+            assert_eq!(format!("{character}"), format!("{rna_character}"));
         }
     }
 }

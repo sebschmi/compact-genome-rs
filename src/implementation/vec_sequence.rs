@@ -62,7 +62,10 @@ impl<AlphabetType: Alphabet> GenomeSequenceMut<AlphabetType, SliceSubGenome<Alph
 impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
-    type Iterator <'a>= std::slice::Iter<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
+    type Iterator<'a>
+        = std::slice::Iter<'a, AlphabetType::CharacterType>
+    where
+        AlphabetType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         self.as_genome_subsequence().iter()
@@ -76,7 +79,10 @@ impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, SliceSubGenom
 impl<AlphabetType: Alphabet> Sequence<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for SliceSubGenome<AlphabetType>
 {
-    type Iterator<'a> = std::slice::Iter<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
+    type Iterator<'a>
+        = std::slice::Iter<'a, AlphabetType::CharacterType>
+    where
+        AlphabetType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         self.slice.iter()
@@ -287,7 +293,10 @@ impl<AlphabetType: Alphabet> ToOwned for SliceSubGenome<AlphabetType> {
 impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for VectorGenome<AlphabetType>
 {
-    type IteratorMut<'a> = std::slice::IterMut<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
+    type IteratorMut<'a>
+        = std::slice::IterMut<'a, AlphabetType::CharacterType>
+    where
+        AlphabetType: 'a;
 
     fn iter_mut(&mut self) -> Self::IteratorMut<'_> {
         self.vector.iter_mut()
@@ -309,7 +318,10 @@ impl<AlphabetType: Alphabet> IndexMut<Range<usize>> for VectorGenome<AlphabetTyp
 impl<AlphabetType: Alphabet> SequenceMut<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for SliceSubGenome<AlphabetType>
 {
-    type IteratorMut<'a> = std::slice::IterMut<'a, AlphabetType::CharacterType> where AlphabetType: 'a;
+    type IteratorMut<'a>
+        = std::slice::IterMut<'a, AlphabetType::CharacterType>
+    where
+        AlphabetType: 'a;
 
     fn iter_mut(&mut self) -> Self::IteratorMut<'_> {
         self.slice.iter_mut()

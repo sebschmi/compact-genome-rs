@@ -63,7 +63,10 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
     Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitStoreType>>
     for BitVectorGenome<AlphabetType, BitStoreType>
 {
-    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType, BitStoreType> where AlphabetType: 'a;
+    type Iterator<'a>
+        = BitVectorSubGenomeIterator<'a, AlphabetType, BitStoreType>
+    where
+        AlphabetType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         self.as_genome_subsequence().iter()
@@ -78,7 +81,10 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore>
     Sequence<AlphabetType::CharacterType, BitVectorSubGenome<AlphabetType, BitStoreType>>
     for BitVectorSubGenome<AlphabetType, BitStoreType>
 {
-    type Iterator<'a> = BitVectorSubGenomeIterator<'a, AlphabetType, BitStoreType> where AlphabetType: 'a;
+    type Iterator<'a>
+        = BitVectorSubGenomeIterator<'a, AlphabetType, BitStoreType>
+    where
+        AlphabetType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         BitVectorSubGenomeIterator { slice: self }

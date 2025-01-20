@@ -44,7 +44,11 @@ impl<const K: usize, AlphabetType: Alphabet>
     Sequence<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for ArrayKmer<K, AlphabetType>
 {
-    type Iterator<'a> = std::slice::Iter<'a, AlphabetType::CharacterType> where Self: 'a, AlphabetType::CharacterType: 'a;
+    type Iterator<'a>
+        = std::slice::Iter<'a, AlphabetType::CharacterType>
+    where
+        Self: 'a,
+        AlphabetType::CharacterType: 'a;
 
     fn iter(&self) -> Self::Iterator<'_> {
         self.array.iter()
@@ -78,7 +82,11 @@ impl<const K: usize, AlphabetType: Alphabet>
     SequenceMut<AlphabetType::CharacterType, SliceSubGenome<AlphabetType>>
     for ArrayKmer<K, AlphabetType>
 {
-    type IteratorMut<'a> = std::slice::IterMut<'a, AlphabetType::CharacterType>  where Self: 'a, AlphabetType::CharacterType: 'a;
+    type IteratorMut<'a>
+        = std::slice::IterMut<'a, AlphabetType::CharacterType>
+    where
+        Self: 'a,
+        AlphabetType::CharacterType: 'a;
 
     fn iter_mut(&mut self) -> Self::IteratorMut<'_> {
         self.array.iter_mut()
