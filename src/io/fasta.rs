@@ -286,7 +286,9 @@ impl<AlphabetType: Alphabet, Reader: Read> Iterator
                         Err(_) => {
                             if !self.skip_invalid_characters {
                                 self.result = Some(Err(IOError::AlphabetError(
-                                    AlphabetError::AsciiNotPartOfAlphabet { ascii },
+                                    AlphabetError::AsciiNotPartOfAlphabet {
+                                        ascii: char::from(ascii),
+                                    },
                                 )));
                                 return None;
                             }

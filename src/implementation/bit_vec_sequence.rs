@@ -327,7 +327,7 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore> Index<usize>
         let bit_width = alphabet_character_bit_width(AlphabetType::SIZE);
         let offset = index * bit_width;
         let limit = (index + 1) * bit_width;
-        let value: usize = self.bits[offset..limit].load();
+        let value: u8 = self.bits[offset..limit].load();
         Self::Output::from_index_ref(value).expect("bitvec contains invalid character")
     }
 }
@@ -514,8 +514,8 @@ impl<AlphabetType: Alphabet, BitStoreType: BitStore> Hash
     }
 }
 
-pub(crate) const fn alphabet_character_bit_width(size: usize) -> usize {
-    mem::size_of::<usize>() * 8 - ((size - 1).leading_zeros() as usize)
+pub(crate) const fn alphabet_character_bit_width(size: u8) -> usize {
+    mem::size_of::<u8>() * 8 - ((size - 1).leading_zeros() as usize)
 }
 
 #[cfg(test)]

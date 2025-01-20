@@ -32,7 +32,7 @@ pub struct SubstitutionDistanceOneNeighborIterator<
     Subsequence: GenomeSequenceMut<AlphabetType, Subsequence> + ?Sized,
 > {
     current_index: usize,
-    current_character: usize,
+    current_character: u8,
     original_character: AlphabetType::CharacterType,
     sequence: Sequence,
     subsequence: PhantomData<Subsequence>,
