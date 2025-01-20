@@ -7,7 +7,7 @@ impl_generic_alphabet!(
     RnaAlphabetOrN,
     RnaCharacterOrN,
     b"ACGNU",
-    b"UGCNA"
+    b"UGCNA",
 );
 
 #[cfg(test)]

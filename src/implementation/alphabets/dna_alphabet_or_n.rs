@@ -7,7 +7,7 @@ impl_generic_alphabet!(
     DnaAlphabetOrN,
     DnaCharacterOrN,
     b"ACGNT",
-    b"TGCNA"
+    b"TGCNA",
 );
 
 #[cfg(test)]

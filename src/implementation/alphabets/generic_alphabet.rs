@@ -269,7 +269,7 @@ impl<Table: CharacterFromToAsciiTable> Hash for GenericCharacter<Table> {
 /// ```
 #[macro_export]
 macro_rules! impl_generic_alphabet {
-    ($name:literal, $alphabet:ident, $character:ident, $character_to_ascii:literal, $char_to_comp_ascii:literal) => {
+    ($name:literal, $alphabet:ident, $character:ident, $character_to_ascii:literal, $char_to_comp_ascii:literal $(,)?) => {
         #[doc = concat!("The translation table between internal ", $name, " character indices and ASCII characters.")]
         pub struct DnaCharacterFromToAsciiTable;
 
