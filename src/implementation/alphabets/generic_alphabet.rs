@@ -66,9 +66,9 @@ const U8_TABLE: [u8; 256] = const {
 /// ```rust
 /// use compact_genome::implementation::alphabets::generic_alphabet::CharacterFromToAsciiTable;
 ///
-/// struct DnaCharacterFromToAsciiTable;
+/// struct AlphabetCharacterFromToAsciiTable;
 ///
-/// impl CharacterFromToAsciiTable for DnaCharacterFromToAsciiTable {
+/// impl CharacterFromToAsciiTable for AlphabetCharacterFromToAsciiTable {
 ///     const CHARACTER_TO_ASCII: &[u8] = b"ACGT";
 ///     const CHAR_TO_COMP_ASCII: &[u8] = b"TGCA";
 /// }
@@ -271,10 +271,10 @@ impl<Table: CharacterFromToAsciiTable> Hash for GenericCharacter<Table> {
 macro_rules! impl_generic_alphabet {
     ($name:literal, $alphabet:ident, $character:ident, $character_to_ascii:literal, $char_to_comp_ascii:literal $(,)?) => {
         #[doc = concat!("The translation table between internal ", $name, " character indices and ASCII characters.")]
-        pub struct DnaCharacterFromToAsciiTable;
+        pub struct AlphabetCharacterFromToAsciiTable;
 
         impl $crate::implementation::alphabets::generic_alphabet::CharacterFromToAsciiTable
-            for DnaCharacterFromToAsciiTable
+            for AlphabetCharacterFromToAsciiTable
         {
             const CHARACTER_TO_ASCII: &[u8] = $character_to_ascii;
             const CHAR_TO_COMP_ASCII: &[u8] = $char_to_comp_ascii;
@@ -286,7 +286,7 @@ macro_rules! impl_generic_alphabet {
         #[repr(transparent)]
         pub struct $character(
             $crate::implementation::alphabets::generic_alphabet::GenericCharacter<
-                DnaCharacterFromToAsciiTable,
+                AlphabetCharacterFromToAsciiTable,
             >,
         );
 
@@ -324,7 +324,8 @@ macro_rules! impl_generic_alphabet {
         }
 
         impl $crate::interface::alphabet::AlphabetCharacter for $character {
-            const ALPHABET_SIZE: u8 = <DnaCharacterFromToAsciiTable as $crate::implementation::alphabets::generic_alphabet::CharacterFromToAsciiTable>::ALPHABET_SIZE;
+            const ALPHABET_SIZE: u8 = <AlphabetCharacterFromToAsciiTable as
+                $crate::implementation::alphabets::generic_alphabet::CharacterFromToAsciiTable>::ALPHABET_SIZE;
 
             fn index(&self) -> u8 {
                 self.0.index()
