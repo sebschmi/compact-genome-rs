@@ -324,7 +324,7 @@ macro_rules! impl_generic_alphabet {
         }
 
         impl $crate::interface::alphabet::AlphabetCharacter for $character {
-            const ALPHABET_SIZE: u8 = 4;
+            const ALPHABET_SIZE: u8 = <DnaCharacterFromToAsciiTable as $crate::implementation::alphabets::generic_alphabet::CharacterFromToAsciiTable>::ALPHABET_SIZE;
 
             fn index(&self) -> u8 {
                 self.0.index()
