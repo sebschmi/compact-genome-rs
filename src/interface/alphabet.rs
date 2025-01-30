@@ -78,7 +78,7 @@ pub enum AlphabetError {
 pub mod rand {
     use std::marker::PhantomData;
 
-    use rand::{distributions::Uniform, prelude::Distribution};
+    use rand::{distr::Uniform, prelude::Distribution};
 
     use super::{Alphabet, AlphabetCharacter};
 
@@ -93,7 +93,7 @@ pub mod rand {
         for UniformAlphabetDistribution<AlphabetType>
     {
         fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> AlphabetType::CharacterType {
-            let index_distribution = Uniform::new(0, AlphabetType::SIZE);
+            let index_distribution = Uniform::new(0, AlphabetType::SIZE).unwrap();
             let index = index_distribution.sample(rng);
             AlphabetType::CharacterType::from_index(index).unwrap()
         }
