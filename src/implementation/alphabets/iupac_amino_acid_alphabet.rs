@@ -22,7 +22,7 @@ mod tests {
         let characters = b"ARNDCQEGHILKMFPSTWYVX";
 
         for ascii in 0u8..=255u8 {
-            if characters.iter().any(|&character| character == ascii) {
+            if characters.contains(&ascii) {
                 assert_eq!(
                     u8::from(
                         IupacAminoAcidCharacter::try_from(ascii).unwrap_or_else(|_| panic!(
