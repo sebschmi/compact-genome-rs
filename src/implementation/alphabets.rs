@@ -3,6 +3,7 @@
 pub mod dna_alphabet;
 pub mod dna_alphabet_or_n;
 pub mod dna_iupac_nucleic_acid_alphabet;
+pub mod famsa_amino_acid_alphabet;
 pub mod generic_alphabet;
 pub mod iupac_amino_acid_alphabet;
 pub mod rna_alphabet;
