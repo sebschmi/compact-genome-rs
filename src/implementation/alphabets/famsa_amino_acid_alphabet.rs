@@ -1,10 +1,17 @@
 //! The [FAMSA amino acid alphabet][1].
 //!
-//! There may be a definition for it, but we couldn't find it with a quick search.
-//! Hopefully, someone will answer our [github issue][2] about this.
+//! This is a small extension of the [IUPAC amino acid alphabet][2].
+//! According to [a github issue in the FAMSA repository][3], the meaning of the additional symbols is the following:
+//!
+//! * B: Represents asparagine (Asn) or aspartic acid (Asp)
+//! * Z: Represents glutamic acid (Glu) or glutamine (Gln)
+//! * X, *: Represents any or unknown amino acid
+//!
+//! However, FAMSA treats all these symbols (and any other symbols not in the list above) as unknown.
 //!
 //! [1]: https://github.com/refresh-bio/FAMSA/blob/1669fc1444c8bc4000d71121ec2a7aa62d848b57/src/msa.cpp#L42
-//! [2]: https://github.com/refresh-bio/FAMSA/issues/53
+//! [2]: https://web.archive.org/web/20250221074139/https://iupac.qmul.ac.uk/AminoAcid/AA1n2.html
+//! [3]: https://github.com/refresh-bio/FAMSA/issues/53
 
 use crate::impl_generic_alphabet;
 
