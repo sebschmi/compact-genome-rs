@@ -15,8 +15,7 @@ mod tests {
             if ascii == b'A' || ascii == b'C' || ascii == b'G' || ascii == b'T' {
                 assert_eq!(
                     u8::from(DnaCharacter::try_from(ascii).unwrap_or_else(|_| panic!(
-                        "character {} was expected to be valid, but is not",
-                        ascii
+                        "character {ascii} was expected to be valid, but is not"
                     ))),
                     ascii
                 );

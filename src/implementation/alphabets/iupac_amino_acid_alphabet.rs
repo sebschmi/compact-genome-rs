@@ -26,8 +26,7 @@ mod tests {
                 assert_eq!(
                     u8::from(
                         IupacAminoAcidCharacter::try_from(ascii).unwrap_or_else(|_| panic!(
-                            "character {} was expected to be valid, but is not",
-                            ascii
+                            "character {ascii} was expected to be valid, but is not"
                         ))
                     ),
                     ascii
