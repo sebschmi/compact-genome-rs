@@ -367,6 +367,20 @@ impl<Handle> FastaRecord<Handle> {
             sequence_handle: transformation(self.sequence_handle),
         }
     }
+
+    /// Transforms the handle into a new type.
+    ///
+    /// If the transformation fails, the corresponding error is returned.
+    pub fn try_transform_handle<NewHandle, Error>(
+        self,
+        transformation: impl FnOnce(Handle) -> Result<NewHandle, Error>,
+    ) -> Result<FastaRecord<NewHandle>, Error> {
+        Ok(FastaRecord {
+            id: self.id,
+            comment: self.comment,
+            sequence_handle: transformation(self.sequence_handle)?,
+        })
+    }
 }
 
 #[cfg(test)]
