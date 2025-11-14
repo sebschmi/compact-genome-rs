@@ -40,7 +40,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "compact-genome"
-version = "12.4.0"
+version = "12.5.0"
 dependencies = [
  "bitvec",
  "enum-iterator",
