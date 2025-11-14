@@ -355,6 +355,20 @@ where
     Ok(())
 }
 
+impl<Handle> FastaRecord<Handle> {
+    /// Transforms the handle into a new type.
+    pub fn transform_handle<NewHandle>(
+        self,
+        transformation: impl FnOnce(Handle) -> NewHandle,
+    ) -> FastaRecord<NewHandle> {
+        FastaRecord {
+            id: self.id,
+            comment: self.comment,
+            sequence_handle: transformation(self.sequence_handle),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use core::str;
